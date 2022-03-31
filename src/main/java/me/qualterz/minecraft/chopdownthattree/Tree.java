@@ -13,12 +13,14 @@ public class Tree {
     private final LinkedHashSet<BlockPos> traversedLogs = new LinkedHashSet<>();
 
     private final World world;
+    private final BlockPos startPos;
     private final Block logBlock;
 
     public Tree(World world, BlockPos blockPos) {
         var block = world.getBlockState(blockPos);
 
         this.world = world;
+        this.startPos = blockPos;
         this.logBlock = block.getBlock();
 
         logsToTraverse.add(blockPos);
