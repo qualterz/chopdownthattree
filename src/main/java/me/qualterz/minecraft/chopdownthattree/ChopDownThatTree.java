@@ -1,9 +1,7 @@
 package me.qualterz.minecraft.chopdownthattree;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -44,13 +42,18 @@ public class ChopDownThatTree implements ModInitializer {
 		trees.forEach(Tree::traverse);
 
 		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
-			tree.getTraversedBlocks().forEach(log -> {
-				var treeBreakerEntry = treeBreakers.entrySet().stream().filter(entry ->
-						entry.getValue().equals(tree)).findAny();
+			var attachedBlocks = tree.getDiscoveredBlocks().stream().filter(pos ->
+					Utils.isBeeBlock(world.getBlockState(pos))).collect(Collectors.toSet());
 
-				if (treeBreakerEntry.isPresent()) {
-					var breaker = treeBreakerEntry.get().getKey();
-					world.breakBlock(log, true, breaker);
+			var breaker = treeBreakers.entrySet().stream().filter(entry ->
+					entry.getValue().equals(tree)).findAny().map(Map.Entry::getKey);
+
+			var blocksToBreak = tree.getTraversedBlocks();
+			blocksToBreak.addAll(attachedBlocks);
+
+			blocksToBreak.forEach(log -> {
+				if (breaker.isPresent()) {
+					world.breakBlock(log, true, breaker.get());
 				} else {
 					world.breakBlock(log, true);
 				}
