@@ -25,6 +25,10 @@ public class Utils {
         return state.getBlock().equals(Blocks.AIR);
     }
 
+    public static boolean isBeeBlock(BlockState state) {
+        return state.getBlock().equals(Blocks.BEE_NEST);
+    }
+
     public static List<BlockPos> getNeighborBlocks(BlockPos pos) {
         var blocks = new ArrayList<BlockPos>();
 

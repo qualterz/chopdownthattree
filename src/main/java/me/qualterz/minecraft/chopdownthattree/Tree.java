@@ -12,6 +12,7 @@ public class Tree {
     private boolean shouldTraverseUpwardsOnly;
 
     private final PriorityQueue<BlockPos> logsToTraverse = new PriorityQueue<>();
+    private final LinkedHashSet<BlockPos> discoveredBlocks = new LinkedHashSet<>();
     private final LinkedHashSet<BlockPos> traversedLogs = new LinkedHashSet<>();
 
     private final World world;
@@ -48,10 +49,15 @@ public class Tree {
                 p -> !traversedLogs.contains(p) && !logsToTraverse.contains(p)
         ).toList();
 
-        traversedLogs.add(pos);
         logsToTraverse.addAll(nonTraversedLogs);
+        discoveredBlocks.addAll(neighborBlocks);
+        traversedLogs.add(pos);
 
         return pos;
+    }
+
+    public Collection<BlockPos> getDiscoveredBlocks() {
+        return discoveredBlocks;
     }
 
     public Collection<BlockPos> getTraversedLogs() {
