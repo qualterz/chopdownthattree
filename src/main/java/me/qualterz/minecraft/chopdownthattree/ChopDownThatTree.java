@@ -53,7 +53,8 @@ public class ChopDownThatTree implements ModInitializer {
 
 			blocksToBreak.forEach(log -> {
 				if (breaker.isPresent()) {
-					world.breakBlock(log, true, breaker.get());
+					var shouldBlocksDrop = !breaker.get().isCreative();
+					world.breakBlock(log, shouldBlocksDrop, breaker.get());
 				} else {
 					world.breakBlock(log, true);
 				}
