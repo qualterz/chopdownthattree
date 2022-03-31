@@ -1,5 +1,7 @@
 package me.qualterz.minecraft.chopdownthattree;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,6 +21,7 @@ import net.minecraft.world.World;
 @Log4j2
 public class ChopDownThatTree implements ModInitializer {
 	private final List<Tree> trees = new LinkedList<>();
+	private final HashMap<PlayerEntity, Tree> treeBreakers = new LinkedHashMap<>();
 
 	@Override
 	public void onInitialize() {
@@ -28,7 +31,10 @@ public class ChopDownThatTree implements ModInitializer {
 
 	private boolean beforeBlockBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, BlockEntity blockEntity) {
 		if (!player.isSneaking() && Utils.isLogBlock(world.getBlockState(pos))) {
-			trees.add(new Tree(world, pos).traverseUpwardsOnly());
+			var tree = new Tree(world, pos).traverseUpwardsOnly();
+
+			treeBreakers.put(player, tree);
+			trees.add(tree);
 		}
 
 		return true;
@@ -38,10 +44,20 @@ public class ChopDownThatTree implements ModInitializer {
 		trees.forEach(Tree::traverseLog);
 
 		trees.stream().filter(Tree::isLogsTraversed).forEach(tree -> {
-			tree.getTraversedLogs().forEach(log ->
-					world.breakBlock(log, true));
+			tree.getTraversedLogs().forEach(log -> {
+				var treeBreakerEntry = treeBreakers.entrySet().stream().filter(entry ->
+						entry.getValue().equals(tree)).findAny();
+
+				if (treeBreakerEntry.isPresent()) {
+					var breaker = treeBreakerEntry.get().getKey();
+					world.breakBlock(log, true, breaker);
+				} else {
+					world.breakBlock(log, true);
+				}
+			});
 		});
 
 		trees.removeIf(Tree::isLogsTraversed);
+		treeBreakers.entrySet().removeIf(entry -> entry.getValue().isLogsTraversed());
 	}
 }
