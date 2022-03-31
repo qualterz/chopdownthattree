@@ -28,7 +28,7 @@ public class ChopDownThatTree implements ModInitializer {
 
 	private boolean beforeBlockBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, BlockEntity blockEntity) {
 		if (!player.isSneaking() && Utils.isLogBlock(world.getBlockState(pos))) {
-			trees.add(new Tree(world, pos));
+			trees.add(new Tree(world, pos).traverseUpwardsOnly());
 		}
 
 		return true;

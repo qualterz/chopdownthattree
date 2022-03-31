@@ -9,6 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.PriorityQueue;
 
 public class Tree {
+    private boolean shouldTraverseUpwardsOnly;
+
     private final PriorityQueue<BlockPos> logsToTraverse = new PriorityQueue<>();
     private final LinkedHashSet<BlockPos> traversedLogs = new LinkedHashSet<>();
 
@@ -34,6 +36,10 @@ public class Tree {
 
         var neighborBlocks = Utils.getNeighborBlocks(pos);
 
+        if (shouldTraverseUpwardsOnly) {
+            neighborBlocks.removeIf(p -> p.getY() <= startPos.getY());
+        }
+
         var neighborLogs = neighborBlocks.stream().filter(
                 p -> world.getBlockState(p).getBlock().equals(logBlock)
         ).toList();
@@ -54,5 +60,10 @@ public class Tree {
 
     public boolean isLogsTraversed() {
         return logsToTraverse.isEmpty();
+    }
+
+    public Tree traverseUpwardsOnly() {
+        shouldTraverseUpwardsOnly = true;
+        return this;
     }
 }
