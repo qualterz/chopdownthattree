@@ -35,12 +35,11 @@ public class ChopDownThatTree implements ModInitializer {
 	}
 
 	private void onEndTick(ServerWorld world) {
-		trees.forEach(tree -> {
-			var log = tree.traverseLog();
+		trees.forEach(Tree::traverseLog);
 
-			if (log != null) {
-				world.breakBlock(log, true);
-			}
+		trees.stream().filter(Tree::isLogsTraversed).forEach(tree -> {
+			tree.getTraversedLogs().forEach(log ->
+					world.breakBlock(log, true));
 		});
 
 		trees.removeIf(Tree::isLogsTraversed);
