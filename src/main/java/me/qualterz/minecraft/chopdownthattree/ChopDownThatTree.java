@@ -41,10 +41,10 @@ public class ChopDownThatTree implements ModInitializer {
 	}
 
 	private void onEndTick(ServerWorld world) {
-		trees.forEach(Tree::traverseLog);
+		trees.forEach(Tree::traverse);
 
-		trees.stream().filter(Tree::isLogsTraversed).forEach(tree -> {
-			tree.getTraversedLogs().forEach(log -> {
+		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
+			tree.getTraversedBlocks().forEach(log -> {
 				var treeBreakerEntry = treeBreakers.entrySet().stream().filter(entry ->
 						entry.getValue().equals(tree)).findAny();
 
@@ -57,7 +57,7 @@ public class ChopDownThatTree implements ModInitializer {
 			});
 		});
 
-		trees.removeIf(Tree::isLogsTraversed);
-		treeBreakers.entrySet().removeIf(entry -> entry.getValue().isLogsTraversed());
+		trees.removeIf(Tree::isBlocksTraversed);
+		treeBreakers.entrySet().removeIf(entry -> entry.getValue().isBlocksTraversed());
 	}
 }

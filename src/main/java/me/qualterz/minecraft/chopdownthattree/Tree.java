@@ -11,29 +11,29 @@ import java.util.PriorityQueue;
 public class Tree {
     private boolean shouldTraverseUpwardsOnly;
 
-    private final PriorityQueue<BlockPos> logsToTraverse = new PriorityQueue<>();
+    private final PriorityQueue<BlockPos> blocksToTraverse = new PriorityQueue<>();
     private final LinkedHashSet<BlockPos> discoveredBlocks = new LinkedHashSet<>();
-    private final LinkedHashSet<BlockPos> traversedLogs = new LinkedHashSet<>();
+    private final LinkedHashSet<BlockPos> traversedBlocks = new LinkedHashSet<>();
 
     private final World world;
     private final BlockPos startPos;
-    private final Block logBlock;
+    private final Block nodeBlock;
 
     public Tree(World world, BlockPos blockPos) {
         var block = world.getBlockState(blockPos);
 
         this.world = world;
         this.startPos = blockPos;
-        this.logBlock = block.getBlock();
+        this.nodeBlock = block.getBlock();
 
-        logsToTraverse.add(blockPos);
+        blocksToTraverse.add(blockPos);
     }
 
-    public BlockPos traverseLog() {
-        if (logsToTraverse.isEmpty())
+    public BlockPos traverse() {
+        if (blocksToTraverse.isEmpty())
             return null;
 
-        var pos = logsToTraverse.poll();
+        var pos = blocksToTraverse.poll();
 
         var neighborBlocks = Utils.getNeighborBlocks(pos);
 
@@ -41,17 +41,17 @@ public class Tree {
             neighborBlocks.removeIf(p -> p.getY() <= startPos.getY());
         }
 
-        var neighborLogs = neighborBlocks.stream().filter(
-                p -> world.getBlockState(p).getBlock().equals(logBlock)
+        var neighborNodes = neighborBlocks.stream().filter(
+                p -> world.getBlockState(p).getBlock().equals(nodeBlock)
         ).toList();
 
-        var nonTraversedLogs = neighborLogs.stream().filter(
-                p -> !traversedLogs.contains(p) && !logsToTraverse.contains(p)
+        var nonTraversedNodes = neighborNodes.stream().filter(
+                p -> !traversedBlocks.contains(p) && !blocksToTraverse.contains(p)
         ).toList();
 
-        logsToTraverse.addAll(nonTraversedLogs);
+        blocksToTraverse.addAll(nonTraversedNodes);
         discoveredBlocks.addAll(neighborBlocks);
-        traversedLogs.add(pos);
+        traversedBlocks.add(pos);
 
         return pos;
     }
@@ -60,12 +60,12 @@ public class Tree {
         return discoveredBlocks;
     }
 
-    public Collection<BlockPos> getTraversedLogs() {
-        return traversedLogs;
+    public Collection<BlockPos> getTraversedBlocks() {
+        return traversedBlocks;
     }
 
-    public boolean isLogsTraversed() {
-        return logsToTraverse.isEmpty();
+    public boolean isBlocksTraversed() {
+        return blocksToTraverse.isEmpty();
     }
 
     public Tree traverseUpwardsOnly() {
