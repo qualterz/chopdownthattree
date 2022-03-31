@@ -5,6 +5,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.PriorityQueue;
 
@@ -56,11 +57,11 @@ public class Tree {
         return pos;
     }
 
-    public Collection<BlockPos> getDiscoveredBlocks() {
+    public HashSet<BlockPos> getDiscoveredBlocks() {
         return discoveredBlocks;
     }
 
-    public Collection<BlockPos> getTraversedBlocks() {
+    public HashSet<BlockPos> getTraversedBlocks() {
         return traversedBlocks;
     }
 
