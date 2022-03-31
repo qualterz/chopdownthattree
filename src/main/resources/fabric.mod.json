@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "chopdownthattree",
+  "version": "${version}",
+
+  "name": "ChopDownThatTree",
+  "description": "A mod that changes tree breaking process",
+  "authors": [
+    "Qualterz"
+  ],
+  "contact": {
+    "homepage": "https://github.com/qualterz/chopdownthattree",
+    "sources": "https://github.com/qualterz/chopdownthattree"
+  },
+
+  "license": "GPLv3",
+  "icon": "assets/chopdownthattree/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.qualterz.minecraft.chopdownthattree.ChopDownThatTree"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "fabric": "*",
+    "minecraft": "1.18.x",
+    "java": ">=17"
+  }
+}
