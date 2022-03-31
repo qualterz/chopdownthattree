@@ -66,4 +66,8 @@ public class Tree {
         shouldTraverseUpwardsOnly = true;
         return this;
     }
+
+    public BlockPos getStartPos() {
+        return startPos;
+    }
 }
