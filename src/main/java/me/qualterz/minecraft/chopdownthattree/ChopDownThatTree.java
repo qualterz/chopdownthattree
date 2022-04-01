@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -75,6 +76,10 @@ public class ChopDownThatTree implements ModInitializer {
 				world.setBlockState(logToBreak, block);
 			}
 
+			var tool = player.getMainHandStack();
+			tool.damage(1, player, (entity) ->
+					entity.sendEquipmentBreakStatus(EquipmentSlot.MAINHAND));
+
 			return false;
 		}
 
@@ -103,9 +108,7 @@ public class ChopDownThatTree implements ModInitializer {
 
 				var shouldBlocksDrop = !breaker.isCreative();
 
-				blocksToBreak.forEach(log -> {
-					world.breakBlock(log, shouldBlocksDrop, breaker);
-				});
+				blocksToBreak.forEach(log -> world.breakBlock(log, shouldBlocksDrop, breaker));
 
 				treeBreaked.put(tree, true);
 			}
