@@ -19,7 +19,10 @@ import net.minecraft.world.World;
 @Log4j2
 public class ChopDownThatTree implements ModInitializer {
 	private final List<Tree> trees = new LinkedList<>();
-	private final HashMap<PlayerEntity, Tree> treeBreakers = new LinkedHashMap<>();
+	private final HashMap<Tree, Stack<BlockPos>> treeLogsToBreak = new LinkedHashMap<>();
+	private final HashMap<Tree, Vector<BlockPos>> treeLogsBreaked = new LinkedHashMap<>();
+	private final HashMap<Tree, Boolean> treeBreaked = new LinkedHashMap<>();
+	private final HashMap<Tree, PlayerEntity> treeBreakers = new LinkedHashMap<>();
 
 	@Override
 	public void onInitialize() {
@@ -37,43 +40,83 @@ public class ChopDownThatTree implements ModInitializer {
 			if (shouldIgnore)
 				return true;
 
-			var tree = new Tree(world, pos);
+			var existingTree = treeLogsToBreak.entrySet().stream().filter(entry ->
+					entry.getValue().stream().anyMatch(p -> p.equals(pos))).findAny().map(Map.Entry::getKey);
 
-			var shouldTraverseUpwardsOnly = !isCreative || !isSneaking;
-			if (shouldTraverseUpwardsOnly)
-				tree.traverseUpwardsOnly();
+			if (existingTree.isEmpty()) {
+				var tree = new Tree(world, pos);
 
-			treeBreakers.put(player, tree);
-			trees.add(tree);
+				var shouldTraverseUpwardsOnly = !isCreative || !isSneaking;
+				if (shouldTraverseUpwardsOnly)
+					tree.traverseUpwardsOnly();
+
+				treeLogsToBreak.put(tree, new Stack<>());
+				treeLogsBreaked.put(tree, new Vector<>());
+
+				treeBreakers.put(tree, player);
+				trees.add(tree);
+
+				treeLogsToBreak.get(tree).push(pos);
+
+				existingTree = Optional.of(tree);
+			}
+
+			var logs = treeLogsToBreak.get(existingTree.get());
+
+			if (!logs.isEmpty()) {
+				var logToBreak = logs.pop();
+				var breakedLogs = treeLogsBreaked.get(existingTree.get());
+
+				breakedLogs.add(logToBreak);
+
+				var block = world.getBlockState(logToBreak);
+
+				world.breakBlock(logToBreak, false);
+				world.setBlockState(logToBreak, block);
+			}
+
+			return false;
 		}
 
 		return true;
 	}
 
 	private void onEndTick(ServerWorld world) {
-		trees.forEach(Tree::traverse);
-
-		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
-			var attachedBlocks = tree.getDiscoveredBlocks().stream().filter(pos ->
-					Utils.isBeeBlock(world.getBlockState(pos))).collect(Collectors.toSet());
-
-			var breaker = treeBreakers.entrySet().stream().filter(entry ->
-					entry.getValue().equals(tree)).findAny().map(Map.Entry::getKey);
-
-			var blocksToBreak = tree.getTraversedBlocks();
-			blocksToBreak.addAll(attachedBlocks);
-
-			blocksToBreak.forEach(log -> {
-				if (breaker.isPresent()) {
-					var shouldBlocksDrop = !breaker.get().isCreative();
-					world.breakBlock(log, shouldBlocksDrop, breaker.get());
-				} else {
-					world.breakBlock(log, true);
-				}
-			});
+		trees.forEach(tree -> {
+			if (!tree.isBlocksTraversed())
+				treeLogsToBreak.get(tree).push(tree.traverse());
 		});
 
-		trees.removeIf(Tree::isBlocksTraversed);
-		treeBreakers.entrySet().removeIf(entry -> entry.getValue().isBlocksTraversed());
+		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
+			// TODO: check for blocks that does not exists
+			var isAllLogsBreaked = treeLogsBreaked.get(tree).containsAll(tree.getTraversedBlocks());
+			var isPlayerInCreative = treeBreakers.get(tree).isCreative();
+
+			if (isAllLogsBreaked || isPlayerInCreative) {
+				var attachedBlocks = tree.getDiscoveredBlocks().stream().filter(pos ->
+						Utils.isBeeBlock(world.getBlockState(pos))).collect(Collectors.toSet());
+
+				var breaker = treeBreakers.get(tree);
+
+				var blocksToBreak = tree.getTraversedBlocks();
+				blocksToBreak.addAll(attachedBlocks);
+
+				var shouldBlocksDrop = !breaker.isCreative();
+
+				blocksToBreak.forEach(log -> {
+					world.breakBlock(log, shouldBlocksDrop, breaker);
+				});
+
+				treeBreaked.put(tree, true);
+			}
+		});
+
+		treeBreaked.forEach((tree, isBreaked) -> {
+			trees.remove(tree);
+			treeLogsToBreak.remove(tree);
+			treeLogsBreaked.remove(tree);
+		});
+
+		treeBreaked.entrySet().removeIf(Map.Entry::getValue);
 	}
 }
