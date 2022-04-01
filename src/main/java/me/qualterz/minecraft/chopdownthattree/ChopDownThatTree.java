@@ -13,7 +13,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -55,29 +54,23 @@ public class ChopDownThatTree implements ModInitializer {
 		trees.forEach(Tree::traverse);
 
 		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
-			// TODO: consider "persistent" property of leaves block state
-			var hasLeaves = tree.getDiscoveredBlocks().stream().anyMatch(pos ->
-					Utils.isLeavesBlock(world.getBlockState(pos)));
+			var attachedBlocks = tree.getDiscoveredBlocks().stream().filter(pos ->
+					Utils.isBeeBlock(world.getBlockState(pos))).collect(Collectors.toSet());
 
-			if (hasLeaves) {
-				var attachedBlocks = tree.getDiscoveredBlocks().stream().filter(pos ->
-						Utils.isBeeBlock(world.getBlockState(pos))).collect(Collectors.toSet());
+			var breaker = treeBreakers.entrySet().stream().filter(entry ->
+					entry.getValue().equals(tree)).findAny().map(Map.Entry::getKey);
 
-				var breaker = treeBreakers.entrySet().stream().filter(entry ->
-						entry.getValue().equals(tree)).findAny().map(Map.Entry::getKey);
+			var blocksToBreak = tree.getTraversedBlocks();
+			blocksToBreak.addAll(attachedBlocks);
 
-				var blocksToBreak = tree.getTraversedBlocks();
-				blocksToBreak.addAll(attachedBlocks);
-
-				blocksToBreak.forEach(log -> {
-					if (breaker.isPresent()) {
-						var shouldBlocksDrop = !breaker.get().isCreative();
-						world.breakBlock(log, shouldBlocksDrop, breaker.get());
-					} else {
-						world.breakBlock(log, true);
-					}
-				});
-			}
+			blocksToBreak.forEach(log -> {
+				if (breaker.isPresent()) {
+					var shouldBlocksDrop = !breaker.get().isCreative();
+					world.breakBlock(log, shouldBlocksDrop, breaker.get());
+				} else {
+					world.breakBlock(log, true);
+				}
+			});
 		});
 
 		trees.removeIf(Tree::isBlocksTraversed);
