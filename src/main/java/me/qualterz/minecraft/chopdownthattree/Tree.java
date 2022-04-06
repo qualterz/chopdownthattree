@@ -76,4 +76,8 @@ public class Tree {
     public BlockPos getStartPos() {
         return startPos;
     }
+
+    public Block getNodeBlock() {
+        return nodeBlock;
+    }
 }
