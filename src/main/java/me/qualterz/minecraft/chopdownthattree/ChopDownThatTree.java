@@ -112,6 +112,8 @@ public class ChopDownThatTree implements ModInitializer {
 				var breaker = treeBreakers.get(tree);
 
 				var blocksToBreak = tree.getTraversedBlocks();
+
+				blocksToBreak.removeIf(pos -> !Utils.isLogBlock(world.getBlockState(pos)));
 				blocksToBreak.addAll(attachedBlocks);
 
 				var shouldBlocksDrop = !breaker.isCreative();
