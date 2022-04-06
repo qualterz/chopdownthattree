@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 @Log4j2
 public class ChopDownThatTree implements ModInitializer {
 	private final List<Tree> trees = new LinkedList<>();
-	private final HashMap<Tree, Stack<BlockPos>> treeLogsToBreak = new LinkedHashMap<>();
+	private final HashMap<Tree, Queue<BlockPos>> treeLogsToBreak = new LinkedHashMap<>();
 	private final HashMap<Tree, Vector<BlockPos>> treeLogsBreaked = new LinkedHashMap<>();
 	private final HashMap<Tree, Boolean> treeBreaked = new LinkedHashMap<>();
 	private final HashMap<Tree, PlayerEntity> treeBreakers = new LinkedHashMap<>();
@@ -41,7 +41,7 @@ public class ChopDownThatTree implements ModInitializer {
 			if (shouldIgnore)
 				return true;
 
-			var existingTree = treeLogsToBreak.entrySet().stream().filter(entry ->
+			var existingTree = treeLogsBreaked.entrySet().stream().filter(entry ->
 					entry.getValue().stream().anyMatch(p -> p.equals(pos))).findAny().map(Map.Entry::getKey);
 
 			if (existingTree.isEmpty()) {
@@ -51,21 +51,24 @@ public class ChopDownThatTree implements ModInitializer {
 				if (shouldTraverseUpwardsOnly)
 					tree.traverseUpwardsOnly();
 
-				treeLogsToBreak.put(tree, new Stack<>());
+				treeLogsToBreak.put(tree, new PriorityQueue<>());
 				treeLogsBreaked.put(tree, new Vector<>());
 
 				treeBreakers.put(tree, player);
 				trees.add(tree);
 
-				treeLogsToBreak.get(tree).push(pos);
+				treeLogsToBreak.get(tree).add(tree.traverse());
 
 				existingTree = Optional.of(tree);
 			}
 
-			var logs = treeLogsToBreak.get(existingTree.get());
+			var logsToBreak = treeLogsToBreak.get(existingTree.get());
 
-			if (!logs.isEmpty()) {
-				var logToBreak = logs.pop();
+			if (logsToBreak.isEmpty() && !existingTree.get().isBlocksTraversed())
+				logsToBreak.add(existingTree.get().traverse());
+
+			if (!logsToBreak.isEmpty()) {
+				var logToBreak = logsToBreak.poll();
 				var breakedLogs = treeLogsBreaked.get(existingTree.get());
 
 				breakedLogs.add(logToBreak);
@@ -89,7 +92,7 @@ public class ChopDownThatTree implements ModInitializer {
 	private void onEndTick(ServerWorld world) {
 		trees.forEach(tree -> {
 			if (!tree.isBlocksTraversed())
-				treeLogsToBreak.get(tree).push(tree.traverse());
+				treeLogsToBreak.get(tree).add(tree.traverse());
 		});
 
 		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
