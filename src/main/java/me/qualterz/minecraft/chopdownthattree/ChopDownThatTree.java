@@ -20,9 +20,9 @@ import net.minecraft.world.World;
 @Log4j2
 public class ChopDownThatTree implements ModInitializer {
 	private final List<Tree> trees = new LinkedList<>();
+	private final List<Tree> treesBreaked = new LinkedList<>();
 	private final HashMap<Tree, Queue<BlockPos>> treeLogsToBreak = new LinkedHashMap<>();
 	private final HashMap<Tree, Vector<BlockPos>> treeLogsBreaked = new LinkedHashMap<>();
-	private final HashMap<Tree, Boolean> treeBreaked = new LinkedHashMap<>();
 	private final HashMap<Tree, PlayerEntity> treeBreakers = new LinkedHashMap<>();
 
 	@Override
@@ -57,15 +57,20 @@ public class ChopDownThatTree implements ModInitializer {
 				treeBreakers.put(tree, player);
 				trees.add(tree);
 
-				treeLogsToBreak.get(tree).add(tree.traverse());
-
 				existingTree = Optional.of(tree);
 			}
 
 			var logsToBreak = treeLogsToBreak.get(existingTree.get());
 
-			if (logsToBreak.isEmpty() && !existingTree.get().isBlocksTraversed())
+			if (logsToBreak.isEmpty() && !existingTree.get().isBlocksTraversed()) {
 				logsToBreak.add(existingTree.get().traverse());
+
+				if (existingTree.get().getDiscoveredBlocks().stream().noneMatch(p ->
+						Utils.isLogBlock(world.getBlockState(p)))) {
+					treesBreaked.add(existingTree.get());
+					return true;
+				}
+			}
 
 			if (!logsToBreak.isEmpty()) {
 				var logToBreak = logsToBreak.poll();
@@ -113,16 +118,16 @@ public class ChopDownThatTree implements ModInitializer {
 
 				blocksToBreak.forEach(log -> world.breakBlock(log, shouldBlocksDrop, breaker));
 
-				treeBreaked.put(tree, true);
+				treesBreaked.add(tree);
 			}
 		});
 
-		treeBreaked.forEach((tree, isBreaked) -> {
+		treesBreaked.forEach(tree -> {
 			trees.remove(tree);
 			treeLogsToBreak.remove(tree);
 			treeLogsBreaked.remove(tree);
 		});
 
-		treeBreaked.entrySet().removeIf(Map.Entry::getValue);
+		treesBreaked.clear();
 	}
 }
