@@ -38,7 +38,7 @@ public class Tree {
         var neighborBlocks = Utils.getNeighborBlocks(pos);
 
         if (shouldTraverseUpwardsOnly) {
-            neighborBlocks.removeIf(p -> p.getY() <= startPos.getY());
+            neighborBlocks.removeIf(p -> p.getY() < startPos.getY());
         }
 
         var neighborNodes = neighborBlocks.stream().filter(
