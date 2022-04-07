@@ -17,6 +17,9 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+// TODO: implement branch break feature
+// TODO: implement tree data save and load
+
 @Log4j2
 public class ChopDownThatTree implements ModInitializer {
 	private final List<Tree> trees = new LinkedList<>();
@@ -32,7 +35,6 @@ public class ChopDownThatTree implements ModInitializer {
 	}
 
 	private boolean beforeBlockBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, BlockEntity blockEntity) {
-		// TODO: implement branch break feature
 		if (Utils.isLogBlock(world.getBlockState(pos))) {
 			var hasAxe = player.getMainHandStack().getItem().getName().getString().contains("Axe");
 			var isCreative = player.isCreative();
@@ -139,12 +141,10 @@ public class ChopDownThatTree implements ModInitializer {
 	private void onEndTick(ServerWorld world) {
 		trees.forEach(tree -> {
 			if (!tree.isBlocksTraversed())
-				// TODO: add new placed neighbor logs
 				treeLogsToBreak.get(tree).add(tree.traverse());
 		});
 
 		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
-			// TODO: check for blocks that does not exists
 			var isAllLogsBreaked = treeLogsBreaked.get(tree).containsAll(tree.getTraversedBlocks());
 			var isPlayerInCreative = treeBreakers.get(tree).isCreative();
 
