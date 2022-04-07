@@ -74,8 +74,16 @@ public class ChopDownThatTree implements ModInitializer {
 			}
 
 			if (!logsToBreak.isEmpty()) {
-				var logToBreak = logsToBreak.poll();
 				var breakedLogs = treeLogsBreaked.get(existingTree.get());
+				var logToBreak = logsToBreak.poll();
+
+				while (!Utils.isLogBlock(world.getBlockState(logToBreak))) {
+					breakedLogs.add(logToBreak);
+					logToBreak = logsToBreak.poll();
+
+					if (logToBreak == null)
+						return true;
+				}
 
 				Optional<Tree> finalExistingTree = existingTree;
 				BlockPos finalLogToBreak = logToBreak;
@@ -84,6 +92,7 @@ public class ChopDownThatTree implements ModInitializer {
 						.filter(entry -> !entry.getKey().equals(finalExistingTree.get()))
 						.filter(entry -> entry.getValue().stream()
 								.anyMatch(p -> p.equals(finalLogToBreak)))
+						.map(Map.Entry::getKey)
 						.toList();
 
 				var anotherBreakedLogs = treeLogsBreaked.entrySet().stream()
