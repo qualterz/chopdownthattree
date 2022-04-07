@@ -95,25 +95,25 @@ public class ChopDownThatTree implements ModInitializer {
 						.map(Map.Entry::getKey)
 						.toList();
 
-				var anotherBreakedLogs = treeLogsBreaked.entrySet().stream()
-						.filter(entry -> !entry.getKey().equals(finalExistingTree.get()))
-						.filter(entry -> entry.getValue().stream()
-								.anyMatch(p -> p.equals(finalLogToBreak)))
-						.map(Map.Entry::getValue)
-						.flatMap(Collection::stream)
-						.collect(Collectors.toSet());
+				if (!treesToMerge.isEmpty()) {
+					var anotherBreakedLogs = treeLogsBreaked.entrySet().stream()
+							.filter(entry -> !entry.getKey().equals(finalExistingTree.get()))
+							.filter(entry -> entry.getValue().stream()
+									.anyMatch(p -> p.equals(finalLogToBreak)))
+							.map(Map.Entry::getValue)
+							.flatMap(Collection::stream)
+							.collect(Collectors.toSet());
 
-				if (!anotherBreakedLogs.isEmpty()) {
 					breakedLogs.addAll(anotherBreakedLogs);
 					logsToBreak.removeAll(anotherBreakedLogs);
 
 					logToBreak = logsToBreak.poll();
 
-					treeLogsToBreak.entrySet().stream()
-									.filter(entry -> treesToMerge.stream()
-											.anyMatch(tree -> entry.getKey() == tree))
-									.map(Map.Entry::getValue)
-							.forEach(collection -> collection.removeAll(breakedLogs));
+					treesToMerge.forEach(tree -> {
+						trees.remove(tree);
+						treeLogsToBreak.remove(tree);
+						treeLogsBreaked.remove(tree);
+					});
 				}
 
 				if (logToBreak == null)
