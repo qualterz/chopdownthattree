@@ -22,7 +22,7 @@ public class ChopDownThatTree implements ModInitializer {
 	private final List<Tree> trees = new LinkedList<>();
 	private final List<Tree> treesBreaked = new LinkedList<>();
 	private final HashMap<Tree, Queue<BlockPos>> treeLogsToBreak = new LinkedHashMap<>();
-	private final HashMap<Tree, Vector<BlockPos>> treeLogsBreaked = new LinkedHashMap<>();
+	private final HashMap<Tree, HashSet<BlockPos>> treeLogsBreaked = new LinkedHashMap<>();
 	private final HashMap<Tree, PlayerEntity> treeBreakers = new LinkedHashMap<>();
 
 	@Override
@@ -32,6 +32,7 @@ public class ChopDownThatTree implements ModInitializer {
 	}
 
 	private boolean beforeBlockBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, BlockEntity blockEntity) {
+		// TODO: implement branch break feature
 		if (Utils.isLogBlock(world.getBlockState(pos))) {
 			var hasAxe = player.getMainHandStack().getItem().getName().getString().contains("Axe");
 			var isCreative = player.isCreative();
@@ -52,7 +53,7 @@ public class ChopDownThatTree implements ModInitializer {
 					tree.traverseUpwardsOnly();
 
 				treeLogsToBreak.put(tree, new PriorityQueue<>());
-				treeLogsBreaked.put(tree, new Vector<>());
+				treeLogsBreaked.put(tree, new LinkedHashSet<>());
 
 				treeBreakers.put(tree, player);
 				trees.add(tree);
@@ -76,10 +77,42 @@ public class ChopDownThatTree implements ModInitializer {
 				var logToBreak = logsToBreak.poll();
 				var breakedLogs = treeLogsBreaked.get(existingTree.get());
 
+				Optional<Tree> finalExistingTree = existingTree;
+				BlockPos finalLogToBreak = logToBreak;
+
+				var treesToMerge = treeLogsBreaked.entrySet().stream()
+						.filter(entry -> !entry.getKey().equals(finalExistingTree.get()))
+						.filter(entry -> entry.getValue().stream()
+								.anyMatch(p -> p.equals(finalLogToBreak)))
+						.toList();
+
+				var anotherBreakedLogs = treeLogsBreaked.entrySet().stream()
+						.filter(entry -> !entry.getKey().equals(finalExistingTree.get()))
+						.filter(entry -> entry.getValue().stream()
+								.anyMatch(p -> p.equals(finalLogToBreak)))
+						.map(Map.Entry::getValue)
+						.flatMap(Collection::stream)
+						.collect(Collectors.toSet());
+
+				if (!anotherBreakedLogs.isEmpty()) {
+					breakedLogs.addAll(anotherBreakedLogs);
+					logsToBreak.removeAll(anotherBreakedLogs);
+
+					logToBreak = logsToBreak.poll();
+
+					treeLogsToBreak.entrySet().stream()
+									.filter(entry -> treesToMerge.stream()
+											.anyMatch(tree -> entry.getKey() == tree))
+									.map(Map.Entry::getValue)
+							.forEach(collection -> collection.removeAll(breakedLogs));
+				}
+
+				if (logToBreak == null)
+					return true;
+
 				breakedLogs.add(logToBreak);
 
 				var block = world.getBlockState(logToBreak);
-
 				world.breakBlock(logToBreak, false);
 				world.setBlockState(logToBreak, block);
 			}
@@ -97,6 +130,7 @@ public class ChopDownThatTree implements ModInitializer {
 	private void onEndTick(ServerWorld world) {
 		trees.forEach(tree -> {
 			if (!tree.isBlocksTraversed())
+				// TODO: add new placed neighbor logs
 				treeLogsToBreak.get(tree).add(tree.traverse());
 		});
 
