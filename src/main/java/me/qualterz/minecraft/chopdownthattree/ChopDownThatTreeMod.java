@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import lombok.extern.log4j.Log4j2;
 
+import me.qualterz.minecraft.chopdownthattree.utils.Tree;
+import me.qualterz.minecraft.chopdownthattree.utils.Utils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -18,10 +20,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 // TODO: implement branch break feature
-// TODO: implement tree data save and load
+// TODO: implement tree data load and save
 
 @Log4j2
-public class ChopDownThatTree implements ModInitializer {
+public class ChopDownThatTreeMod implements ModInitializer {
+	public static final String MOD_ID = "chopdownthattree";
+
 	private final List<Tree> trees = new LinkedList<>();
 	private final List<Tree> treesBreaked = new LinkedList<>();
 	private final HashMap<Tree, Queue<BlockPos>> treeLogsToBreak = new LinkedHashMap<>();
@@ -34,7 +38,7 @@ public class ChopDownThatTree implements ModInitializer {
 		ServerTickEvents.END_WORLD_TICK.register(this::onEndTick);
 	}
 
-	private boolean beforeBlockBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, BlockEntity blockEntity) {
+	private boolean beforeBlockBreak(World world, PlayerEntity player, BlockPos pos, BlockState block, BlockEntity blockEntity) {
 		if (Utils.isLogBlock(world.getBlockState(pos))) {
 			var hasAxe = player.getMainHandStack().getItem().getName().getString().contains("Axe");
 			var isCreative = player.isCreative();
@@ -57,7 +61,6 @@ public class ChopDownThatTree implements ModInitializer {
 				treeLogsToBreak.put(tree, new PriorityQueue<>());
 				treeLogsBreaked.put(tree, new LinkedHashSet<>());
 
-				treeBreakers.put(tree, player);
 				trees.add(tree);
 
 				existingTree = Optional.of(tree);
@@ -122,10 +125,11 @@ public class ChopDownThatTree implements ModInitializer {
 					return true;
 
 				breakedLogs.add(logToBreak);
+				treeBreakers.put(existingTree.get(), player);
 
-				var block = world.getBlockState(logToBreak);
+				var logBlock = world.getBlockState(logToBreak);
 				world.breakBlock(logToBreak, false);
-				world.setBlockState(logToBreak, block);
+				world.setBlockState(logToBreak, logBlock);
 			}
 
 			var tool = player.getMainHandStack();

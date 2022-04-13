@@ -1,4 +1,4 @@
-package me.qualterz.minecraft.chopdownthattree;
+package me.qualterz.minecraft.chopdownthattree.utils;
 
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;

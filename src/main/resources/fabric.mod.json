@@ -19,7 +19,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.qualterz.minecraft.chopdownthattree.ChopDownThatTree"
+      "me.qualterz.minecraft.chopdownthattree.ChopDownThatTreeMod"
     ]
   },
   "depends": {

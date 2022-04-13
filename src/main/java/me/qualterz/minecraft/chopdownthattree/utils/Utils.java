@@ -1,4 +1,4 @@
-package me.qualterz.minecraft.chopdownthattree;
+package me.qualterz.minecraft.chopdownthattree.utils;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
