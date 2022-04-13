@@ -74,6 +74,7 @@ public class ChopDownThatTreeMod implements ModInitializer {
 				if (existingTree.get().getDiscoveredBlocks().stream().noneMatch(p ->
 						Utils.isLogBlock(world.getBlockState(p)))) {
 					treesBreaked.add(existingTree.get());
+					treeBreakers.put(existingTree.get(), player);
 					return true;
 				}
 			}
