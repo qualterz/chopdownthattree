@@ -150,8 +150,10 @@ public class ChopDownThatTreeMod implements ModInitializer {
 		});
 
 		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
+			var player = treeBreakers.get(tree);
+
 			var isAllLogsBreaked = treeLogsBreaked.get(tree).containsAll(tree.getTraversedBlocks());
-			var isPlayerInCreative = treeBreakers.get(tree).isCreative();
+			var isPlayerInCreative = player != null && player.isCreative();
 
 			if (isAllLogsBreaked || isPlayerInCreative) {
 				var attachedBlocks = tree.getDiscoveredBlocks().stream().filter(pos ->
