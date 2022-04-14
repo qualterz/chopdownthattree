@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import lombok.extern.log4j.Log4j2;
 
-import me.qualterz.minecraft.chopdownthattree.utils.Tree;
+import me.qualterz.minecraft.chopdownthattree.utils.TreeCrawler;
 import me.qualterz.minecraft.chopdownthattree.utils.Utils;
 
 import net.fabricmc.api.ModInitializer;
@@ -32,11 +32,11 @@ import net.minecraft.world.World;
 public class ChopDownThatTreeMod implements ModInitializer {
 	public static final String MOD_ID = "chopdownthattree";
 
-	private final List<Tree> trees = new LinkedList<>();
-	private final List<Tree> treesBreaked = new LinkedList<>();
-	private final HashMap<Tree, Queue<BlockPos>> treeLogsToBreak = new LinkedHashMap<>();
-	private final HashMap<Tree, HashSet<BlockPos>> treeLogsBreaked = new LinkedHashMap<>();
-	private final HashMap<Tree, PlayerEntity> treeBreakers = new LinkedHashMap<>();
+	private final List<TreeCrawler> treeCrawlers = new LinkedList<>();
+	private final List<TreeCrawler> treesBreaked = new LinkedList<>();
+	private final HashMap<TreeCrawler, Queue<BlockPos>> treeLogsToBreak = new LinkedHashMap<>();
+	private final HashMap<TreeCrawler, HashSet<BlockPos>> treeLogsBreaked = new LinkedHashMap<>();
+	private final HashMap<TreeCrawler, PlayerEntity> treeBreakers = new LinkedHashMap<>();
 
 	@Override
 	public void onInitialize() {
@@ -50,28 +50,28 @@ public class ChopDownThatTreeMod implements ModInitializer {
 		var state = (TreesState) world.getPersistentStateManager()
 				.getOrCreate(TreesState::fromNbt, TreesState::new, MOD_ID);
 
-		trees.addAll(state.treePositions.stream().map(pos -> new Tree(world, pos)).toList());
+		treeCrawlers.addAll(state.treePositions.stream().map(pos -> new TreeCrawler(world, pos)).toList());
 
 		state.treePositions.forEach(pos -> {
-			var tree = new Tree(world, pos);
+			var treeCrawler = new TreeCrawler(world, pos);
 			var breaker = state.treeBreakers.get(pos);
 
-			trees.add(tree);
+			treeCrawlers.add(treeCrawler);
 
-			trees.forEach(t -> {
+			treeCrawlers.forEach(t -> {
 				treeLogsToBreak.put(t, new PriorityQueue<>());
 				treeLogsBreaked.put(t, new LinkedHashSet<>());
 
 				treeLogsBreaked.get(t).addAll(state.treeLogsBreaked.get(t.getStartPos()));
 			});
 
-			treeBreakers.put(tree, server.getPlayerManager().getPlayer(breaker));
+			treeBreakers.put(treeCrawler, server.getPlayerManager().getPlayer(breaker));
 		});
 
 	}
 
 	private void onWorldUnload(MinecraftServer server, ServerWorld world) {
-		trees.clear();
+		treeCrawlers.clear();
 		treesBreaked.clear();
 		treeLogsToBreak.clear();
 		treeLogsBreaked.clear();
@@ -100,21 +100,21 @@ public class ChopDownThatTreeMod implements ModInitializer {
 					.getPersistentStateManager().get(TreesState::fromNbt, MOD_ID);
 
 			if (existingTree.isEmpty()) {
-				var tree = new Tree(world, pos);
+				var treeCrawler = new TreeCrawler(world, pos);
 
 				var shouldTraverseUpwardsOnly = !isCreative || !isSneaking;
 				if (shouldTraverseUpwardsOnly)
-					tree.traverseUpwardsOnly();
+					treeCrawler.traverseUpwardsOnly();
 
-				treeLogsToBreak.put(tree, new PriorityQueue<>());
-				treeLogsBreaked.put(tree, new LinkedHashSet<>());
+				treeLogsToBreak.put(treeCrawler, new PriorityQueue<>());
+				treeLogsBreaked.put(treeCrawler, new LinkedHashSet<>());
 
-				trees.add(tree);
+				treeCrawlers.add(treeCrawler);
 
-				state.treePositions.add(tree.getStartPos());
+				state.treePositions.add(treeCrawler.getStartPos());
 				state.markDirty();
 
-				existingTree = Optional.of(tree);
+				existingTree = Optional.of(treeCrawler);
 			}
 
 			var logsToBreak = treeLogsToBreak.get(existingTree.get());
@@ -147,7 +147,7 @@ public class ChopDownThatTreeMod implements ModInitializer {
 						return true;
 				}
 
-				Optional<Tree> finalExistingTree = existingTree;
+				Optional<TreeCrawler> finalExistingTree = existingTree;
 				BlockPos finalLogToBreak = logToBreak;
 
 				var treesToMerge = treeLogsBreaked.entrySet().stream()
@@ -173,15 +173,15 @@ public class ChopDownThatTreeMod implements ModInitializer {
 
 					logToBreak = logsToBreak.poll();
 
-					treesToMerge.forEach(tree -> {
-						trees.remove(tree);
-						treeLogsToBreak.remove(tree);
-						treeLogsBreaked.remove(tree);
-						treeBreakers.remove(tree);
+					treesToMerge.forEach(treeCrawler -> {
+						treeCrawlers.remove(treeCrawler);
+						treeLogsToBreak.remove(treeCrawler);
+						treeLogsBreaked.remove(treeCrawler);
+						treeBreakers.remove(treeCrawler);
 
-						state.treePositions.remove(tree.getStartPos());
-						state.treeBreakers.remove(tree.getStartPos());
-						state.treeLogsBreaked.removeAll(tree.getStartPos());
+						state.treePositions.remove(treeCrawler.getStartPos());
+						state.treeBreakers.remove(treeCrawler.getStartPos());
+						state.treeLogsBreaked.removeAll(treeCrawler.getStartPos());
 					});
 
 					state.markDirty();
@@ -216,35 +216,35 @@ public class ChopDownThatTreeMod implements ModInitializer {
 		var state = (TreesState) world.getServer().getWorld(world.getRegistryKey())
 				.getPersistentStateManager().get(TreesState::fromNbt, MOD_ID);
 
-		trees.forEach(tree -> {
-			if (!tree.isBlocksTraversed()) {
-				var traversedLog = tree.traverse();
+		treeCrawlers.forEach(treeCrawler -> {
+			if (!treeCrawler.isBlocksTraversed()) {
+				var traversedLog = treeCrawler.traverse();
 
-				while (treeLogsBreaked.get(tree).contains(traversedLog)) {
-					traversedLog = tree.traverse();
+				while (treeLogsBreaked.get(treeCrawler).contains(traversedLog)) {
+					traversedLog = treeCrawler.traverse();
 				}
 
 				if (traversedLog != null)
-					treeLogsToBreak.get(tree).add(traversedLog);
+					treeLogsToBreak.get(treeCrawler).add(traversedLog);
 				else
-					treesBreaked.add(tree);
+					treesBreaked.add(treeCrawler);
 			}
 		});
 
-		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
-			var player = treeBreakers.get(tree);
+		treeCrawlers.stream().filter(TreeCrawler::isBlocksTraversed).forEach(treeCrawler -> {
+			var player = treeBreakers.get(treeCrawler);
 
-			var isAllLogsBreaked = treeLogsBreaked.get(tree)
-					.containsAll(tree.getTraversedBlocks());
+			var isAllLogsBreaked = treeLogsBreaked.get(treeCrawler)
+					.containsAll(treeCrawler.getTraversedBlocks());
 			var isPlayerInCreative = player != null && player.isCreative();
 
 			if (isAllLogsBreaked || isPlayerInCreative) {
-				var attachedBlocks = tree.getDiscoveredBlocks().stream().filter(pos ->
+				var attachedBlocks = treeCrawler.getDiscoveredBlocks().stream().filter(pos ->
 						Utils.isBeeBlock(world.getBlockState(pos))).collect(Collectors.toSet());
 
-				var breaker = treeBreakers.get(tree);
+				var breaker = treeBreakers.get(treeCrawler);
 
-				var blocksToBreak = tree.getTraversedBlocks();
+				var blocksToBreak = treeCrawler.getTraversedBlocks();
 
 				blocksToBreak.removeIf(pos -> !Utils.isLogBlock(world.getBlockState(pos)));
 				blocksToBreak.addAll(attachedBlocks);
@@ -253,19 +253,19 @@ public class ChopDownThatTreeMod implements ModInitializer {
 
 				blocksToBreak.forEach(log -> world.breakBlock(log, shouldBlocksDrop, breaker));
 
-				treesBreaked.add(tree);
+				treesBreaked.add(treeCrawler);
 			}
 		});
 
-		treesBreaked.forEach(tree -> {
-			trees.remove(tree);
-			treeLogsToBreak.remove(tree);
-			treeLogsBreaked.remove(tree);
-			treeBreakers.remove(tree);
+		treesBreaked.forEach(treeCrawler -> {
+			treeCrawlers.remove(treeCrawler);
+			treeLogsToBreak.remove(treeCrawler);
+			treeLogsBreaked.remove(treeCrawler);
+			treeBreakers.remove(treeCrawler);
 
-			state.treePositions.remove(tree.getStartPos());
-			state.treeLogsBreaked.removeAll(tree.getStartPos());
-			state.treeBreakers.remove(tree.getStartPos());
+			state.treePositions.remove(treeCrawler.getStartPos());
+			state.treeLogsBreaked.removeAll(treeCrawler.getStartPos());
+			state.treeBreakers.remove(treeCrawler.getStartPos());
 			state.markDirty();
 		});
 

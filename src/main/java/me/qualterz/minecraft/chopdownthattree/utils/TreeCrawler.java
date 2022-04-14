@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.PriorityQueue;
 
-public class Tree {
+public class TreeCrawler {
     private boolean shouldTraverseUpwardsOnly;
 
     private final PriorityQueue<BlockPos> blocksToTraverse = new PriorityQueue<>();
@@ -19,7 +19,7 @@ public class Tree {
     private final BlockPos startPos;
     private final Block nodeBlock;
 
-    public Tree(World world, BlockPos blockPos) {
+    public TreeCrawler(World world, BlockPos blockPos) {
         var block = world.getBlockState(blockPos);
 
         this.world = world;
@@ -68,7 +68,7 @@ public class Tree {
         return blocksToTraverse.isEmpty();
     }
 
-    public Tree traverseUpwardsOnly() {
+    public TreeCrawler traverseUpwardsOnly() {
         shouldTraverseUpwardsOnly = true;
         return this;
     }
