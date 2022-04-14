@@ -7,20 +7,25 @@ import lombok.extern.log4j.Log4j2;
 
 import me.qualterz.minecraft.chopdownthattree.utils.Tree;
 import me.qualterz.minecraft.chopdownthattree.utils.Utils;
+
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 // TODO: implement branch break feature
-// TODO: implement tree data load and save
+// TODO: decompose callback functions
+// TODO: account dimensions
+// TODO: use Multimap instead of HashMap
 
 @Log4j2
 public class ChopDownThatTreeMod implements ModInitializer {
@@ -34,11 +39,50 @@ public class ChopDownThatTreeMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		ServerWorldEvents.LOAD.register(this::onWorldLoad);
+		ServerWorldEvents.UNLOAD.register(this::onWorldUnload);
 		PlayerBlockBreakEvents.BEFORE.register(this::beforeBlockBreak);
 		ServerTickEvents.END_WORLD_TICK.register(this::onEndTick);
 	}
 
-	private boolean beforeBlockBreak(World world, PlayerEntity player, BlockPos pos, BlockState block, BlockEntity blockEntity) {
+	private void onWorldLoad(MinecraftServer server, ServerWorld world) {
+		var state = (TreesState) world.getChunkManager().getPersistentStateManager()
+				.getOrCreate(TreesState::fromNbt, TreesState::new, MOD_ID);
+
+		trees.addAll(state.treePositions.stream().map(pos -> new Tree(world, pos)).toList());
+
+		state.treePositions.forEach(pos -> {
+			var tree = new Tree(world, pos);
+			var breaker = state.treeBreakers.get(pos);
+
+			trees.add(tree);
+
+			trees.forEach(t -> {
+				treeLogsToBreak.put(t, new PriorityQueue<>());
+				treeLogsBreaked.put(t, new LinkedHashSet<>());
+
+				treeLogsBreaked.get(t).addAll(state.treeLogsBreaked.get(t.getStartPos()));
+			});
+
+			treeBreakers.put(tree, server.getPlayerManager().getPlayer(breaker));
+		});
+
+	}
+
+	private void onWorldUnload(MinecraftServer server, ServerWorld world) {
+		trees.clear();
+		treesBreaked.clear();
+		treeLogsToBreak.clear();
+		treeLogsBreaked.clear();
+		treeBreakers.clear();
+	}
+
+	private boolean beforeBlockBreak(World world,
+									 PlayerEntity player,
+									 BlockPos pos,
+									 BlockState block,
+									 BlockEntity blockEntity)
+	{
 		if (Utils.isLogBlock(world.getBlockState(pos))) {
 			var hasAxe = player.getMainHandStack().getItem().getName().getString().contains("Axe");
 			var isCreative = player.isCreative();
@@ -50,6 +94,9 @@ public class ChopDownThatTreeMod implements ModInitializer {
 
 			var existingTree = treeLogsBreaked.entrySet().stream().filter(entry ->
 					entry.getValue().stream().anyMatch(p -> p.equals(pos))).findAny().map(Map.Entry::getKey);
+
+			var state = (TreesState) world.getServer().getWorld(world.getRegistryKey())
+					.getChunkManager().getPersistentStateManager().get(TreesState::fromNbt, MOD_ID);
 
 			if (existingTree.isEmpty()) {
 				var tree = new Tree(world, pos);
@@ -63,6 +110,9 @@ public class ChopDownThatTreeMod implements ModInitializer {
 
 				trees.add(tree);
 
+				state.treePositions.add(tree.getStartPos());
+				state.markDirty();
+
 				existingTree = Optional.of(tree);
 			}
 
@@ -75,6 +125,11 @@ public class ChopDownThatTreeMod implements ModInitializer {
 						Utils.isLogBlock(world.getBlockState(p)))) {
 					treesBreaked.add(existingTree.get());
 					treeBreakers.put(existingTree.get(), player);
+
+					state.treeLogsBreaked.put(existingTree.get().getStartPos(), pos);
+					state.treeBreakers.put(existingTree.get().getStartPos(), player.getUuid());
+					state.markDirty();
+
 					return true;
 				}
 			}
@@ -128,6 +183,10 @@ public class ChopDownThatTreeMod implements ModInitializer {
 				breakedLogs.add(logToBreak);
 				treeBreakers.put(existingTree.get(), player);
 
+				state.treeLogsBreaked.put(existingTree.get().getStartPos(), logToBreak);
+				state.treeBreakers.put(existingTree.get().getStartPos(), player.getUuid());
+				state.markDirty();
+
 				var logBlock = world.getBlockState(logToBreak);
 				world.breakBlock(logToBreak, false);
 				world.setBlockState(logToBreak, logBlock);
@@ -144,6 +203,9 @@ public class ChopDownThatTreeMod implements ModInitializer {
 	}
 
 	private void onEndTick(ServerWorld world) {
+		var state = (TreesState) world.getServer().getWorld(world.getRegistryKey())
+				.getChunkManager().getPersistentStateManager().get(TreesState::fromNbt, MOD_ID);
+
 		trees.forEach(tree -> {
 			if (!tree.isBlocksTraversed())
 				treeLogsToBreak.get(tree).add(tree.traverse());
@@ -152,7 +214,8 @@ public class ChopDownThatTreeMod implements ModInitializer {
 		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
 			var player = treeBreakers.get(tree);
 
-			var isAllLogsBreaked = treeLogsBreaked.get(tree).containsAll(tree.getTraversedBlocks());
+			var isAllLogsBreaked = treeLogsBreaked.get(tree)
+					.containsAll(tree.getTraversedBlocks());
 			var isPlayerInCreative = player != null && player.isCreative();
 
 			if (isAllLogsBreaked || isPlayerInCreative) {
@@ -178,6 +241,12 @@ public class ChopDownThatTreeMod implements ModInitializer {
 			trees.remove(tree);
 			treeLogsToBreak.remove(tree);
 			treeLogsBreaked.remove(tree);
+			treeBreakers.remove(tree);
+
+			state.treePositions.remove(tree.getStartPos());
+			state.treeLogsBreaked.removeAll(tree.getStartPos());
+			state.treeBreakers.remove(tree.getStartPos());
+			state.markDirty();
 		});
 
 		treesBreaked.clear();
