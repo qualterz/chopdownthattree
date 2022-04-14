@@ -207,8 +207,16 @@ public class ChopDownThatTreeMod implements ModInitializer {
 				.getPersistentStateManager().get(TreesState::fromNbt, MOD_ID);
 
 		trees.forEach(tree -> {
-			if (!tree.isBlocksTraversed())
-				treeLogsToBreak.get(tree).add(tree.traverse());
+			if (!tree.isBlocksTraversed()) {
+				var traversedLog = tree.traverse();
+
+				while (treeLogsBreaked.get(tree).contains(traversedLog)) {
+					traversedLog = tree.traverse();
+				}
+
+				if (traversedLog != null)
+					treeLogsToBreak.get(tree).add(traversedLog);
+			}
 		});
 
 		trees.stream().filter(Tree::isBlocksTraversed).forEach(tree -> {
