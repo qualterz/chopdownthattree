@@ -46,7 +46,7 @@ public class ChopDownThatTreeMod implements ModInitializer {
 	}
 
 	private void onWorldLoad(MinecraftServer server, ServerWorld world) {
-		var state = (TreesState) world.getChunkManager().getPersistentStateManager()
+		var state = (TreesState) world.getPersistentStateManager()
 				.getOrCreate(TreesState::fromNbt, TreesState::new, MOD_ID);
 
 		trees.addAll(state.treePositions.stream().map(pos -> new Tree(world, pos)).toList());
@@ -96,7 +96,7 @@ public class ChopDownThatTreeMod implements ModInitializer {
 					entry.getValue().stream().anyMatch(p -> p.equals(pos))).findAny().map(Map.Entry::getKey);
 
 			var state = (TreesState) world.getServer().getWorld(world.getRegistryKey())
-					.getChunkManager().getPersistentStateManager().get(TreesState::fromNbt, MOD_ID);
+					.getPersistentStateManager().get(TreesState::fromNbt, MOD_ID);
 
 			if (existingTree.isEmpty()) {
 				var tree = new Tree(world, pos);
@@ -204,7 +204,7 @@ public class ChopDownThatTreeMod implements ModInitializer {
 
 	private void onEndTick(ServerWorld world) {
 		var state = (TreesState) world.getServer().getWorld(world.getRegistryKey())
-				.getChunkManager().getPersistentStateManager().get(TreesState::fromNbt, MOD_ID);
+				.getPersistentStateManager().get(TreesState::fromNbt, MOD_ID);
 
 		trees.forEach(tree -> {
 			if (!tree.isBlocksTraversed())
