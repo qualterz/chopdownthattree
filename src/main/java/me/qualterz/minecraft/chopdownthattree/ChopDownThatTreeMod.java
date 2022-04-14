@@ -26,6 +26,7 @@ import net.minecraft.world.World;
 // TODO: decompose callback functions
 // TODO: account dimensions
 // TODO: use Multimap instead of HashMap
+// TODO: connect stripped logs
 
 @Log4j2
 public class ChopDownThatTreeMod implements ModInitializer {
