@@ -169,13 +169,22 @@ public class ChopDownThatTreeMod implements ModInitializer {
 					breakedLogs.addAll(anotherBreakedLogs);
 					logsToBreak.removeAll(anotherBreakedLogs);
 
+					state.treeLogsBreaked.putAll(existingTree.get().getStartPos(), anotherBreakedLogs);
+
 					logToBreak = logsToBreak.poll();
 
 					treesToMerge.forEach(tree -> {
 						trees.remove(tree);
 						treeLogsToBreak.remove(tree);
 						treeLogsBreaked.remove(tree);
+						treeBreakers.remove(tree);
+
+						state.treePositions.remove(tree.getStartPos());
+						state.treeBreakers.remove(tree.getStartPos());
+						state.treeLogsBreaked.removeAll(tree.getStartPos());
 					});
+
+					state.markDirty();
 				}
 
 				if (logToBreak == null)
@@ -217,6 +226,8 @@ public class ChopDownThatTreeMod implements ModInitializer {
 
 				if (traversedLog != null)
 					treeLogsToBreak.get(tree).add(traversedLog);
+				else
+					treesBreaked.add(tree);
 			}
 		});
 
