@@ -1,21 +1,22 @@
 package me.qualterz.minecraft.chopdownthattree.helpers;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.SetMultimap;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-import me.qualterz.minecraft.chopdownthattree.utils.TreeUtil;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.blockAt;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.SetMultimap;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
+import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
 
 /**
@@ -40,7 +41,7 @@ public class TreeParser {
      * Parse direction
      */
     @Getter @Builder.Default
-    private TreeUtil.GrowDirection direction = TreeUtil.GrowDirection.BOTH;
+    private GrowDirection direction = GrowDirection.BOTH;
 
     @Getter private final Set<BlockPos> branchBlocks = new LinkedHashSet<>();
     @Getter private final SetMultimap<BlockPos, BlockPos> branchAttachmentBlocks = LinkedHashMultimap.create();

@@ -1,13 +1,13 @@
 package me.qualterz.minecraft.chopdownthattree.setups;
 
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
 import me.qualterz.minecraft.chopdownthattree.handlers.CreativePlayerTreeBreakHandler;
 import me.qualterz.minecraft.chopdownthattree.handlers.DummyBreakHandler;
 import me.qualterz.minecraft.chopdownthattree.handlers.SurvivalPlayerTreeBreakHandler;
 import me.qualterz.minecraft.chopdownthattree.handlers.BreakHandler;
-
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import static me.qualterz.minecraft.chopdownthattree.utils.EntityUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;

@@ -1,6 +1,9 @@
 package me.qualterz.minecraft.chopdownthattree;
 
+import java.util.*;
+
 import com.google.common.collect.*;
+
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -8,8 +11,6 @@ import net.minecraft.nbt.NbtLong;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.World;
-
-import java.util.*;
 
 public class TreeState extends PersistentState {
     public Set<BlockPos> chopPositions = new LinkedHashSet<>();

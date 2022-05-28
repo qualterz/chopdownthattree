@@ -3,15 +3,10 @@ package me.qualterz.minecraft.chopdownthattree.helpers;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;

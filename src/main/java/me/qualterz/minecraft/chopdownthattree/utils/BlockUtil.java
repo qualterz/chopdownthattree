@@ -1,5 +1,11 @@
 package me.qualterz.minecraft.chopdownthattree.utils;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.NotImplementedException;
+
 import lombok.experimental.UtilityClass;
 
 import net.minecraft.block.Block;
@@ -8,11 +14,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.NotImplementedException;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A utility class that is used to work with blocks

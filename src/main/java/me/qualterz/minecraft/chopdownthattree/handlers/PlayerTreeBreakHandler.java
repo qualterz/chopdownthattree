@@ -1,10 +1,11 @@
 package me.qualterz.minecraft.chopdownthattree.handlers;
 
-import me.qualterz.minecraft.chopdownthattree.helpers.TreeBreaker;
-import me.qualterz.minecraft.chopdownthattree.setups.TreeBreakerSetup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import me.qualterz.minecraft.chopdownthattree.helpers.TreeBreaker;
+import me.qualterz.minecraft.chopdownthattree.setups.TreeBreakerSetup;
 
 public abstract class PlayerTreeBreakHandler extends BreakHandler {
     protected final PlayerEntity player;

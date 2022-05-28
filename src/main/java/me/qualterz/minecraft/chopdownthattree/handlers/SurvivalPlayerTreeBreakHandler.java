@@ -1,22 +1,21 @@
 package me.qualterz.minecraft.chopdownthattree.handlers;
 
-import me.qualterz.minecraft.chopdownthattree.TreeState;
-import me.qualterz.minecraft.chopdownthattree.utils.TreeUtil;
-import me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.GrowDirection;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
 import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
-import static me.qualterz.minecraft.chopdownthattree.utils.EntityUtil.damageMainHandItem;
-import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.getTreeBranchParts;
+import static me.qualterz.minecraft.chopdownthattree.utils.EntityUtil.*;
+import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
+
+import me.qualterz.minecraft.chopdownthattree.TreeState;
 
 public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
-    private TreeState state;
+    private final TreeState state;
     public SurvivalPlayerTreeBreakHandler(BlockPos pos, World world, PlayerEntity player) {
         super(pos, world, player);
         state = TreeState.getState(world);

@@ -1,6 +1,7 @@
 package me.qualterz.minecraft.chopdownthattree.utils;
 
 import lombok.experimental.UtilityClass;
+
 import net.minecraft.item.ItemStack;
 
 @UtilityClass

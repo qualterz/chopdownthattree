@@ -1,7 +1,8 @@
 package me.qualterz.minecraft.chopdownthattree.setups;
 
-import me.qualterz.minecraft.chopdownthattree.helpers.TreeBreaker;
 import net.minecraft.entity.player.PlayerEntity;
+
+import me.qualterz.minecraft.chopdownthattree.helpers.TreeBreaker;
 
 public class TreeBreakerSetup {
     private final TreeBreaker treeBreaker;
