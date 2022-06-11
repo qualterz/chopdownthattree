@@ -20,7 +20,7 @@ public class TreeBreaker {
      * Position of the tree branch or trunk
      */
     @Setter @Getter
-    private BlockPos pos;
+    private BlockPos breakPos;
 
     /**
      * World where the tree is located
@@ -50,17 +50,21 @@ public class TreeBreaker {
      * This method is used to break the tree
      */
     public void breakTree() {
-        if (!isTreeBranchBlock(blockAt(pos, world)))
+        if (!isTreeBranchBlock(blockAt(breakPos, world)))
             return;
 
-        var direction = whole ? GrowDirection.BOTH : GrowDirection.UPWARDS;
+        var blocks = TreeParser.setup()
+                .world(world).pos(breakPos).direction(GrowDirection.BOTH)
+                .apply().parse().blocks();
 
-        TreeParser.setup().world(world).pos(pos).direction(direction).apply().parse().blocks()
-                .forEach(block -> world.breakBlock(block, drop, breakerEntity));
+        var blocksToBreak = blocks.stream();
+        if (!whole) blocksToBreak = blocks.stream().filter(blockPos -> blockPos.getY() >= breakPos.getY());
+
+        blocksToBreak.forEach(block -> world.breakBlock(block, drop, breakerEntity));
     }
 
     public TreeBreaker(BlockPos pos, World world) {
-        this.pos = pos;
+        this.breakPos = pos;
         this.world = world;
     }
 }
