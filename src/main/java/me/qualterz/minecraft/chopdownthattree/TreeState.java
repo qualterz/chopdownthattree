@@ -73,6 +73,14 @@ public class TreeState extends PersistentState {
         lastBreakedLogsCount.put(pos, logs.size());
     }
 
+    public void removeBreakedLogs(BlockPos pos, Set<BlockPos> logs) {
+        breakedLogs.get(pos).removeAll(logs);
+    }
+
+    public void removeBreakedLogs(BlockPos pos) {
+        breakedLogs.get(pos).clear();
+    }
+
     public boolean isTreeExists(BlockPos pos) {
         return chopPositions.contains(pos);
     }

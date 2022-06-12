@@ -4,13 +4,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class BreakHandler {
-    protected final BlockPos pos;
+    protected final BlockPos breakPos;
     protected final World world;
 
     public abstract boolean handleBreak();
 
-    public BreakHandler(BlockPos pos, World world) {
-        this.pos = pos;
+    public BreakHandler(BlockPos breakPos, World world) {
+        this.breakPos = breakPos;
         this.world = world;
     }
 }

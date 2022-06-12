@@ -1,6 +1,7 @@
 package me.qualterz.minecraft.chopdownthattree.handlers;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,26 +13,23 @@ import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.EntityUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
 
-import me.qualterz.minecraft.chopdownthattree.TreeState;
-
 public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
-    private final TreeState state;
-    public SurvivalPlayerTreeBreakHandler(BlockPos pos, World world, PlayerEntity player) {
-        super(pos, world, player);
-        state = TreeState.getState(world);
+    public SurvivalPlayerTreeBreakHandler(BlockPos breakPos, World world, PlayerEntity player) {
+        super(breakPos, world, player);
     }
 
     @Override
     public boolean handleBreak() {
-        state.addTreeIfNotExists(pos);
+        state.addTreeIfNotExists(treePos);
 
         chopTree();
+        mergeTrees();
 
-        var lastBreakedLogsCount = state.lastBreakedLogsCount.get(pos);
+        var lastBreakedLogsCount = state.lastBreakedLogsCount.get(treePos);
 
-        if (lastBreakedLogsCount == 0) {
+        if (lastBreakedLogsCount == null || lastBreakedLogsCount == 0) {
             getTreeBreaker().breakTree();
-            state.removeTree(pos);
+            state.removeTree(treePos);
 
             return true;
         }
@@ -42,17 +40,16 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
     }
 
     private void chopTree() {
-        var breakedLogs = state.breakedLogs.get(pos);
+        if (state.breakedLogs.get(treePos).isEmpty())
+            state.addBreakedLogs(treePos, Set.of(treePos));
 
-        if (breakedLogs.isEmpty()) {
-            breakedLogs.add(pos);
-            state.addBreakedLogs(pos, Set.of(pos));
-        }
+        var breakedLogs = state.breakedLogs.get(treePos);
 
-        var parts = breakedLogs.stream()
+        var nextBreakedLogs = breakedLogs.stream()
                 // Last breaked logs
                 .sorted(Comparator.reverseOrder())
-                .limit(state.lastBreakedLogsCount.get(pos))
+                .limit(state.lastBreakedLogsCount.get(treePos))
+                .sorted(Comparator.naturalOrder())
 
                 // Do not process non branch blocks
                 .filter(blockPos -> isLogBlock(blockAt(blockPos, world)))
@@ -61,13 +58,28 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
                 .flatMap(blockPos -> getTreeBranchParts(blockPos, world, GrowDirection.UPWARDS).stream())
 
                 // Do not process tree branch parts infinitely
-                .filter(blockPos -> !state.breakedLogs.get(pos).contains(blockPos))
+                .filter(blockPos -> !state.breakedLogs.get(treePos).contains(blockPos))
 
                 .collect(Collectors.toUnmodifiableSet());
 
-        state.addBreakedLogs(pos, parts);
-        state.chopCount.computeIfPresent(pos, (blockPos, integer) -> integer++);
+        state.addBreakedLogs(treePos, nextBreakedLogs);
+        state.chopCount.computeIfPresent(treePos, (blockPos, integer) -> integer++);
 
-        parts.forEach(log -> updateBlockWithParticle(log, world));
+        nextBreakedLogs.forEach(log -> updateBlockWithParticle(log, world));
+    }
+
+    private void mergeTrees() {
+        Set<BlockPos> treesToMerge = new HashSet<>();
+
+        state.breakedLogs.get(treePos).forEach(breaked -> {
+            if (state.isTreeExists(breaked) && !breaked.equals(treePos))
+                treesToMerge.add(breaked);
+        });
+
+        treesToMerge.forEach(mergeTreePos -> {
+            var mergeBreakedLogs = state.breakedLogs.get(mergeTreePos);
+            state.addBreakedLogs(treePos, mergeBreakedLogs);
+            state.removeTree(mergeTreePos);
+        });
     }
 }

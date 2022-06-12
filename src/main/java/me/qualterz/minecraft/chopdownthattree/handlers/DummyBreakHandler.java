@@ -4,8 +4,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class DummyBreakHandler extends BreakHandler {
-    public DummyBreakHandler(BlockPos pos, World world) {
-        super(pos, world);
+    public DummyBreakHandler(BlockPos breakPos, World world) {
+        super(breakPos, world);
     }
 
     @Override
