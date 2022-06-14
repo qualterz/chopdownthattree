@@ -79,6 +79,11 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
         treesToMerge.forEach(mergeTreePos -> {
             var mergeBreakedLogs = state.breakedLogs.get(mergeTreePos);
             state.addBreakedLogs(treePos, mergeBreakedLogs);
+
+            state.breakedLogs.get(mergeTreePos).forEach(merged -> {
+                if (!merged.equals(treePos))
+                    state.removeTree(merged);
+            });
             state.removeTree(mergeTreePos);
         });
     }
