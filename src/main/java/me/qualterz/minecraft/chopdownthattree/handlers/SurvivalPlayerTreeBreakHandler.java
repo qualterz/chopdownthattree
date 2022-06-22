@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import me.qualterz.minecraft.chopdownthattree.helpers.TreeBreaker;
+import me.qualterz.minecraft.chopdownthattree.setups.TreeBreakerSetup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -28,7 +30,7 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
         var lastBreakedLogsCount = state.lastBreakedLogsCount.get(treePos);
 
         if (lastBreakedLogsCount == null || lastBreakedLogsCount == 0) {
-            getTreeBreaker().breakTree();
+            TreeBreakerSetup.initialize(new TreeBreaker(breakPos, world)).forPlayer(player).breakTree();
             state.removeTree(treePos);
 
             return true;

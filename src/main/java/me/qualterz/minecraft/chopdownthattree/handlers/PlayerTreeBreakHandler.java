@@ -30,8 +30,4 @@ public abstract class PlayerTreeBreakHandler extends BreakHandler {
                     );
         }
     }
-
-    TreeBreaker getTreeBreaker() {
-        return TreeBreakerSetup.initialize(new TreeBreaker(breakPos, world)).forPlayer(player);
-    }
 }
