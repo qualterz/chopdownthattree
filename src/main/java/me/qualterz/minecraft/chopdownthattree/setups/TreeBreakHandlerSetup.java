@@ -36,7 +36,7 @@ public class TreeBreakHandlerSetup {
                 return new DummyBreakHandler(pos, world);
         } else {
             // Do not process block break as tree break
-            if (isTreeBranchEnd(pos, world) || player.isSneaking()) {
+            if (isTreeBranchTop(pos, world) || player.isSneaking()) {
                 return new DummyBreakHandler(pos, world);
             }
             else

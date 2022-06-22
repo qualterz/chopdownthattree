@@ -81,7 +81,7 @@ public class TreeUtil {
                 && !getTreeBranchParts(pos, world, GrowDirection.BOTH).isEmpty();
     }
 
-    public static boolean isTreeBranchEnd(BlockPos pos, World world) {
+    public static boolean isTreeBranchTop(BlockPos pos, World world) {
         return isLogBlock(blockAt(pos, world))
                 && getTreeBranchParts(pos, world, GrowDirection.UPWARDS).isEmpty();
     }
