@@ -4,9 +4,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import me.qualterz.minecraft.chopdownthattree.helpers.TreeBreaker;
-import me.qualterz.minecraft.chopdownthattree.setups.TreeBreakerSetup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -30,7 +29,7 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
         var lastBreakedLogsCount = state.lastBreakedLogsCount.get(treePos);
 
         if (lastBreakedLogsCount == null || lastBreakedLogsCount == 0) {
-            TreeBreakerSetup.initialize(new TreeBreaker(breakPos, world)).forPlayer(player).breakTree();
+            breakTree();
             state.removeTree(treePos);
 
             return true;
@@ -88,5 +87,15 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
             });
             state.removeTree(mergeTreePos);
         });
+    }
+
+    private void breakTree() {
+        var logs = state.breakedLogs.get(treePos);
+        var attachments = logs.stream()
+                .flatMap(log -> getTreeBranchPartAttachments(log, world).stream())
+                .collect(Collectors.toUnmodifiableSet());
+
+        Stream.concat(logs.stream(), attachments.stream())
+                .forEach(block -> world.breakBlock(block, !player.isCreative(), player));
     }
 }
