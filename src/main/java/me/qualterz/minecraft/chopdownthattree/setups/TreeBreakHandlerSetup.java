@@ -9,8 +9,6 @@ import me.qualterz.minecraft.chopdownthattree.handlers.DummyBreakHandler;
 import me.qualterz.minecraft.chopdownthattree.handlers.SurvivalPlayerTreeBreakHandler;
 import me.qualterz.minecraft.chopdownthattree.handlers.BreakHandler;
 
-import me.qualterz.minecraft.chopdownthattree.TreeState;
-
 import static me.qualterz.minecraft.chopdownthattree.utils.EntityUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
 
@@ -39,7 +37,6 @@ public class TreeBreakHandlerSetup {
         } else {
             // Do not process block break as tree break
             if (isTreeBranchEnd(pos, world) || player.isSneaking()) {
-                TreeState.getState(world).removeTree(pos);
                 return new DummyBreakHandler(pos, world);
             }
             else
