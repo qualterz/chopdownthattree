@@ -24,7 +24,7 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
         state.addTreeIfNotExists(treePos);
 
         chopTree();
-        mergeTrees();
+        mergeTree();
 
         var lastBreakedLogsCount = state.lastBreakedLogsCount.get(treePos);
 
@@ -69,7 +69,7 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
         nextBreakedLogs.forEach(log -> updateBlockWithParticle(log, world));
     }
 
-    private void mergeTrees() {
+    private void mergeTree() {
         Set<BlockPos> treesToMerge = new HashSet<>();
 
         state.breakedLogs.get(treePos).forEach(breaked -> {
