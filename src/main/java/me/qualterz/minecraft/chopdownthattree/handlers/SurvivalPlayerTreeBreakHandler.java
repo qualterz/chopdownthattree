@@ -47,6 +47,8 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
                     getTreeBreaker(parser).breakTree();
                 });
 
+        state.markDirty();
+
         return !logToBreak.isPresent();
     }
 
