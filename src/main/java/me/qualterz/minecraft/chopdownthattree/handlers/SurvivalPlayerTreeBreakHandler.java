@@ -6,7 +6,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
+import me.qualterz.minecraft.chopdownthattree.utils.BlockUtil;
+
 import static me.qualterz.minecraft.chopdownthattree.utils.EntityUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
 
@@ -39,7 +40,7 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
         logToBreak.ifPresentOrElse(
                 log -> {
                     state.breakedLogs.add(log);
-                    logBreakParticle(log);
+                    updateBlockWithParticle(log);
                     damageMainHandItem(player);
                 },
                 () -> {
@@ -52,7 +53,7 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
         return !logToBreak.isPresent();
     }
 
-    private void logBreakParticle(BlockPos pos) {
-        updateBlockWithParticle(pos, world);
+    private void updateBlockWithParticle(BlockPos pos) {
+        BlockUtil.updateBlockWithParticle(pos, world);
     }
 }
