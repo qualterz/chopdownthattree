@@ -1,10 +1,6 @@
 package me.qualterz.minecraft.chopdownthattree.handlers;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -21,81 +17,40 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
 
     @Override
     public boolean handleBreak() {
-        state.addTreeIfNotExists(treePos);
+        var parser = getTreeParserSetup()
+                .direction(GrowDirection.UPWARDS)
+                .apply().parse();
 
-        chopTree();
-        mergeTree();
+        var branchBlocks = parser.branchBlocks();
 
-        var lastBreakedLogsCount = state.lastBreakedLogsCount.get(treePos);
-
-        if (lastBreakedLogsCount == null || lastBreakedLogsCount == 0) {
-            breakTree();
-            state.removeTree(treePos);
-
-            return true;
-        }
-
-        damageMainHandItem(player, lastBreakedLogsCount);
-
-        return false;
-    }
-
-    private void chopTree() {
-        if (state.breakedLogs.get(treePos).isEmpty())
-            state.addBreakedLogs(treePos, Set.of(treePos));
-
-        var breakedLogs = state.breakedLogs.get(treePos);
-
-        var nextBreakedLogs = breakedLogs.stream()
-                // Last breaked logs
-                .sorted(Comparator.reverseOrder())
-                .limit(state.lastBreakedLogsCount.get(treePos))
-                .sorted(Comparator.naturalOrder())
-
-                // Do not process non branch blocks
-                .filter(blockPos -> isLogBlock(blockAt(blockPos, world)))
-
-                // Tree branch parts
-                .flatMap(blockPos -> getTreeBranchParts(blockPos, world, GrowDirection.UPWARDS).stream())
-
-                // Do not process tree branch parts infinitely
-                .filter(blockPos -> !state.breakedLogs.get(treePos).contains(blockPos))
-
+        var nonBreakedLogs = branchBlocks.stream()
+                .filter(log -> !state.breakedLogs.contains(log))
                 .collect(Collectors.toUnmodifiableSet());
 
-        state.addBreakedLogs(treePos, nextBreakedLogs);
-        state.chopCount.computeIfPresent(treePos, (blockPos, integer) -> integer++);
+        var logToBreak = nonBreakedLogs.stream()
+                .sorted((prev, next) -> {
+                    var distancePrev = prev.getSquaredDistance(breakPos);
+                    var distanceNext = next.getSquaredDistance(breakPos);
+                    return (int) Math.min(distancePrev, distanceNext);
+                })
+                .sorted()
+                .findFirst();
 
-        nextBreakedLogs.forEach(log -> updateBlockWithParticle(log, world));
+        logToBreak.ifPresentOrElse(
+                log -> {
+                    state.breakedLogs.add(log);
+                    logBreakParticle(log);
+                    damageMainHandItem(player);
+                },
+                () -> {
+                    state.breakedLogs.removeAll(branchBlocks);
+                    getTreeBreaker(parser).breakTree();
+                });
+
+        return !logToBreak.isPresent();
     }
 
-    private void mergeTree() {
-        Set<BlockPos> treesToMerge = new HashSet<>();
-
-        state.breakedLogs.get(treePos).forEach(breaked -> {
-            if (state.isTreeExists(breaked) && !breaked.equals(treePos))
-                treesToMerge.add(breaked);
-        });
-
-        treesToMerge.forEach(mergeTreePos -> {
-            var mergeBreakedLogs = state.breakedLogs.get(mergeTreePos);
-            state.addBreakedLogs(treePos, mergeBreakedLogs);
-
-            state.breakedLogs.get(mergeTreePos).forEach(merged -> {
-                if (!merged.equals(treePos))
-                    state.removeTree(merged);
-            });
-            state.removeTree(mergeTreePos);
-        });
-    }
-
-    private void breakTree() {
-        var logs = state.breakedLogs.get(treePos);
-        var attachments = logs.stream()
-                .flatMap(log -> getTreeBranchPartAttachments(log, world).stream())
-                .collect(Collectors.toUnmodifiableSet());
-
-        Stream.concat(logs.stream(), attachments.stream())
-                .forEach(block -> world.breakBlock(block, !player.isCreative(), player));
+    private void logBreakParticle(BlockPos pos) {
+        updateBlockWithParticle(pos, world);
     }
 }

@@ -8,9 +8,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
-import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
-
 /**
  * A class that allows to break tree structures
  */
@@ -46,25 +43,28 @@ public class TreeBreaker {
     @Setter @Getter
     private boolean drop = false;
 
-    /**
-     * This method is used to break the tree
-     */
-    public void breakTree() {
-        if (!isTreeBranchBlock(blockAt(breakPos, world)))
-            return;
-
-        var blocks = TreeParser.setup()
-                .world(world).pos(breakPos).direction(GrowDirection.BOTH)
-                .apply().parse().blocks();
-
-        var blocksToBreak = blocks.stream();
-        if (!whole) blocksToBreak = blocks.stream().filter(blockPos -> blockPos.getY() >= breakPos.getY());
-
-        blocksToBreak.forEach(block -> world.breakBlock(block, drop, breakerEntity));
-    }
+    @Getter
+    private TreeParser parser;
 
     public TreeBreaker(BlockPos pos, World world) {
         this.breakPos = pos;
         this.world = world;
+        this.parser = TreeParser.setup()
+                .pos(pos).world(world).apply();
+    }
+
+    public TreeBreaker(TreeParser parser) {
+        this.breakPos = parser.pos();
+        this.world = parser.world();
+        this.parser = parser;
+    }
+
+    /**
+     * This method is used to break the tree
+     */
+    public void breakTree() {
+        var blocksToBreak = parser.parse().blocks().stream();
+        if (!whole) blocksToBreak = blocksToBreak.filter(blockPos -> blockPos.getY() >= breakPos.getY());
+        blocksToBreak.forEach(block -> world.breakBlock(block, drop, breakerEntity));
     }
 }

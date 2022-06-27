@@ -5,29 +5,29 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import me.qualterz.minecraft.chopdownthattree.TreeState;
+import me.qualterz.minecraft.chopdownthattree.helpers.TreeParser;
 import me.qualterz.minecraft.chopdownthattree.helpers.TreeBreaker;
 import me.qualterz.minecraft.chopdownthattree.setups.TreeBreakerSetup;
 
 public abstract class PlayerTreeBreakHandler extends BreakHandler {
     protected final PlayerEntity player;
     protected final TreeState state;
-    protected BlockPos treePos;
 
     public PlayerTreeBreakHandler(BlockPos breakPos, World world, PlayerEntity player) {
         super(breakPos, world);
         this.player = player;
+        this.state = TreeState.getState(world);
+    }
 
-        state = TreeState.getState(world);
+    TreeBreaker getTreeBreaker() {
+        return TreeBreakerSetup.initialize(new TreeBreaker(breakPos, world)).forPlayer(player);
+    }
 
-        if (state.isTreeExists(breakPos))
-            treePos = breakPos;
-        else {
-            state.breakedLogs.entries().stream()
-                    .filter(breaked -> breaked.getValue().equals(breakPos))
-                    .findAny().ifPresentOrElse(
-                            entry -> treePos = entry.getKey(),
-                            () -> treePos = breakPos
-                    );
-        }
+    TreeBreaker getTreeBreaker(TreeParser parser) {
+        return TreeBreakerSetup.initialize(new TreeBreaker(parser)).forPlayer(player);
+    }
+
+    TreeParser.Config getTreeParserSetup() {
+        return TreeParser.setup().pos(breakPos).world(world);
     }
 }
