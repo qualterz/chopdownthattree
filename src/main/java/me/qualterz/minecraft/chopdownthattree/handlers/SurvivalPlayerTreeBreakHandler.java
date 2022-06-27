@@ -8,6 +8,7 @@ import net.minecraft.world.World;
 
 import me.qualterz.minecraft.chopdownthattree.utils.BlockUtil;
 
+import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.EntityUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
 
@@ -39,13 +40,13 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
 
         logToBreak.ifPresentOrElse(
                 log -> {
-                    state.breakedLogs.add(log);
                     updateBlockWithParticle(log);
                     damageMainHandItem(player);
+                    state.breakedLogs.add(log);
                 },
                 () -> {
-                    state.breakedLogs.removeAll(branchBlocks);
                     getTreeBreaker(parser).breakTree();
+                    state.breakedLogs.removeAll(branchBlocks);
                 });
 
         state.markDirty();
