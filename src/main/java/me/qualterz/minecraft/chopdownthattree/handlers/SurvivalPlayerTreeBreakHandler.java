@@ -25,11 +25,12 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
 
         var branchBlocks = parser.branchBlocks();
 
-        var nonBreakedLogs = branchBlocks.stream()
-                .filter(log -> !state.breakedLogs.contains(log))
+        var notChoppedLogs = branchBlocks.stream()
+                .filter(log -> !state.choppedLogs.contains(log))
                 .collect(Collectors.toUnmodifiableSet());
 
-        var logToBreak = nonBreakedLogs.stream()
+        // Closest block to break position
+        var logToBreak = notChoppedLogs.stream()
                 .sorted((prev, next) -> {
                     var distancePrev = prev.getSquaredDistance(breakPos);
                     var distanceNext = next.getSquaredDistance(breakPos);
@@ -42,12 +43,12 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
                 log -> {
                     updateBlockWithParticle(log);
                     damageMainHandItem(player);
-                    state.breakedLogs.add(log);
+                    state.choppedLogs.add(log);
                 },
                 () -> {
                     getTreeBreaker(parser).breakTree();
-                    state.breakedLogs.removeAll(branchBlocks);
-                    state.breakedLogs.removeIf(block -> isLogBlock(blockAt(block, world)));
+                    state.choppedLogs.removeAll(branchBlocks);
+                    state.choppedLogs.removeIf(block -> !isLogBlock(blockAt(block, world)));
                 });
 
         state.markDirty();

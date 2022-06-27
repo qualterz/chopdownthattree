@@ -8,14 +8,14 @@ import net.minecraft.world.PersistentState;
 import net.minecraft.world.World;
 
 public class TreeState extends PersistentState {
-    public Set<BlockPos> breakedLogs = new LinkedHashSet<>();
+    public Set<BlockPos> choppedLogs = new LinkedHashSet<>();
 
     public static PersistentState fromNbt(NbtCompound nbt) {
         var state = new TreeState();
         {
-            var breakedLogs = nbt.getList("BreakedLogs", NbtByte.LONG_TYPE);
+            var choppedLogs = nbt.getList("ChoppedLogs", NbtByte.LONG_TYPE);
 
-            state.breakedLogs.addAll(breakedLogs.stream().map(element ->
+            state.choppedLogs.addAll(choppedLogs.stream().map(element ->
                     BlockPos.fromLong(((NbtLong) element).longValue())).toList());
         }
 
@@ -24,11 +24,11 @@ public class TreeState extends PersistentState {
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt) {
-        var breakedLogs = new NbtList();
-        breakedLogs.addAll(this.breakedLogs.stream()
+        var choppedLogs = new NbtList();
+        choppedLogs.addAll(this.choppedLogs.stream()
                 .map(pos -> NbtLong.of(pos.asLong())).toList());
 
-        nbt.put("BreakedLogs", breakedLogs);
+        nbt.put("ChoppedLogs", choppedLogs);
         return nbt;
     }
 
