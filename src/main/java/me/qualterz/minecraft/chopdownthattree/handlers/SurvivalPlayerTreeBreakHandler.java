@@ -47,6 +47,7 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
                 () -> {
                     getTreeBreaker(parser).breakTree();
                     state.breakedLogs.removeAll(branchBlocks);
+                    state.breakedLogs.removeIf(block -> isLogBlock(blockAt(block, world)));
                 });
 
         state.markDirty();
