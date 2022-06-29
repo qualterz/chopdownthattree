@@ -11,8 +11,6 @@ import lombok.Getter;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
-
 public class BlockCrawler {
     @Getter private final PriorityQueue<BlockPos> blocksToCrawl = new PriorityQueue<>();
 
@@ -22,6 +20,8 @@ public class BlockCrawler {
     public BlockCrawler(BlockPos initialPos, World world) {
         this.initialPos = initialPos;
         this.world = world;
+        
+        initialize();
     }
 
     private void initialize() {
