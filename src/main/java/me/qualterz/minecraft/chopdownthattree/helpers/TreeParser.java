@@ -67,7 +67,7 @@ public class TreeParser {
         while (processedBranchBlocks.size() > 0) {
             processedBranchBlocks = processedBranchBlocks.stream()
                     // Tree branch parts
-                    .flatMap(pos -> getTreeBranchParts(pos, world, direction).stream())
+                    .flatMap(branchPos -> getTreeBranchParts(branchPos, world, direction).stream())
 
                     // Do not process tree branch parts infinitely
                     .filter(block -> !branchBlocks.contains(block))
