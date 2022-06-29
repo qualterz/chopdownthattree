@@ -32,6 +32,10 @@ public class BlockCrawler {
         return !blocksToCrawl.isEmpty();
     }
 
+    public BlockPos nextBlockToCrawl() {
+        return blocksToCrawl.peek();
+    }
+
     public Optional<BlockPos> crawl(Predicate<BlockPos> blockPredicate, Function<BlockPos, Collection<BlockPos>> blocksGetter) {
         var block = blocksToCrawl.poll();
         var shouldCrawl = blockPredicate.test(block);
