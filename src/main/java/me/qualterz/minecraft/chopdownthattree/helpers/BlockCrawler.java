@@ -16,12 +16,12 @@ import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
 public class BlockCrawler {
     @Getter private final PriorityQueue<BlockPos> blocksToCrawl = new PriorityQueue<>();
 
-    @Getter private final World world;
     @Getter private final BlockPos initialPos;
+    @Getter private final World world;
 
-    public BlockCrawler(World world, BlockPos initialPos) {
-        this.world = world;
+    public BlockCrawler(BlockPos initialPos, World world) {
         this.initialPos = initialPos;
+        this.world = world;
     }
 
     private void initialize() {
