@@ -1,7 +1,9 @@
 package me.qualterz.minecraft.chopdownthattree.helpers;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import lombok.Getter;
@@ -30,14 +32,14 @@ public class BlockCrawler {
         return !blocksToCrawl.isEmpty();
     }
 
-    public Optional<BlockPos> crawl(Predicate<BlockPos> predicate) {
+    public Optional<BlockPos> crawl(Predicate<BlockPos> blockPredicate, Function<BlockPos, Collection<BlockPos>> blocksGetter) {
         var block = blocksToCrawl.poll();
-        var shouldCrawl = predicate.test(block);
+        var shouldCrawl = blockPredicate.test(block);
 
         Optional<BlockPos> result = Optional.empty();
 
         if (shouldCrawl) {
-            var nextToCrawl = getNeighborBlocks(block);
+            var nextToCrawl = blocksGetter.apply(block);
             blocksToCrawl.addAll(nextToCrawl);
 
             result = Optional.of(block);
