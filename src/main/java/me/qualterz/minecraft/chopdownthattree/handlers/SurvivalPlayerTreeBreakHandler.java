@@ -15,6 +15,8 @@ import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
 public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
     public SurvivalPlayerTreeBreakHandler(BlockPos breakPos, World world, PlayerEntity player) {
         super(breakPos, world, player);
+
+        state.choppedLogs.add(breakPos);
     }
 
     @Override
