@@ -60,17 +60,32 @@ public class TreeParser {
      */
     public TreeParser parse() {
         Set<BlockPos> processedBranchBlocks = new HashSet<>();
+        Set<BlockPos> ignoredBranchBlocks = new HashSet<>();
 
-        if (isTreeBranchBlock(blockAt(blockPos, world)))
-            processedBranchBlocks.add(blockPos);
+        if (isTreeBranchBlock(blockAt(blockPos, world))) {
+            var treeSlice = getTreeSlice(blockPos);
+            var nextProcessed = treeSlice.stream()
+                    .flatMap(branchPos -> getTreeBranchParts(branchPos, world, direction).stream())
+                    .collect(Collectors.toSet());
+
+            processedBranchBlocks.addAll(treeSlice);
+            processedBranchBlocks.addAll(nextProcessed);
+
+            branchBlocks.addAll(processedBranchBlocks);
+
+            if (direction != GrowDirection.BOTH) ignoredBranchBlocks.addAll(treeSlice);
+        }
 
         while (processedBranchBlocks.size() > 0) {
             processedBranchBlocks = processedBranchBlocks.stream()
-                    // Tree branch parts
-                    .flatMap(branchPos -> getTreeBranchParts(branchPos, world, direction).stream())
+                    // Ignore blocks
+                    .filter(branchPos -> !ignoredBranchBlocks.contains(branchPos))
+
+                    // Get branch parts
+                    .flatMap(branchPos -> getTreeBranchParts(branchPos, world, GrowDirection.BOTH).stream())
 
                     // Do not process tree branch parts infinitely
-                    .filter(block -> !branchBlocks.contains(block))
+                    .filter(branchBlock -> !branchBlocks.contains(branchBlock))
 
                     .collect(Collectors.toUnmodifiableSet());
 
@@ -89,5 +104,22 @@ public class TreeParser {
             if (!attachments.isEmpty())
                 branchAttachmentBlocks.putAll(block, attachments);
         });
+    }
+
+    private Set<BlockPos> getTreeSlice(BlockPos blockPos) {
+        var crawler = new BlockCrawler(blockPos, world);
+
+        Set<BlockPos> slice = new HashSet<>();
+
+        while (crawler.hasBlocksToCrawl()) {
+            var crawled = crawler.crawl(
+                    branchPos -> branchPos.getY() == blockPos.getY() && !slice.contains(branchPos),
+                    branchPos -> getTreeBranchParts(branchPos, world, GrowDirection.UPWARDS)
+            );
+
+            crawled.ifPresent(slice::add);
+        }
+
+        return slice;
     }
 }
