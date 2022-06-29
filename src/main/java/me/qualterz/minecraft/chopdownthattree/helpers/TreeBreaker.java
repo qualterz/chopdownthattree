@@ -46,11 +46,11 @@ public class TreeBreaker {
     @Getter
     private TreeParser parser;
 
-    public TreeBreaker(BlockPos pos, World world) {
-        this.breakPos = pos;
+    public TreeBreaker(BlockPos breakPos, World world) {
+        this.breakPos = breakPos;
         this.world = world;
         this.parser = TreeParser.setup()
-                .blockPos(pos).world(world).apply();
+                .blockPos(breakPos).world(world).apply();
     }
 
     public TreeBreaker(TreeParser parser) {
