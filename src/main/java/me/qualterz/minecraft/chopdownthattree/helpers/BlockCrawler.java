@@ -51,6 +51,10 @@ public class BlockCrawler {
 
         return result;
     }
+    
+    public Optional<BlockPos> crawl(Function<BlockPos, Collection<BlockPos>> blocksGetter) {
+        return crawl(blockPos -> true, blocksGetter);
+    }
 
     public void reset() {
         blocksToCrawl.clear();
