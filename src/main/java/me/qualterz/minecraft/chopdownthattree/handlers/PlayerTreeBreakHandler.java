@@ -28,6 +28,6 @@ public abstract class PlayerTreeBreakHandler extends BreakHandler {
     }
 
     TreeParser.Config getTreeParserSetup() {
-        return TreeParser.setup().pos(breakPos).world(world);
+        return TreeParser.setup().blockPos(breakPos).world(world);
     }
 }

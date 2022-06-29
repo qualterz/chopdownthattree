@@ -29,7 +29,7 @@ public class TreeParser {
      * Position of the tree branch or trunk
      */
     @Getter
-    private BlockPos pos;
+    private BlockPos blockPos;
 
     /**
      * World where the tree is located
@@ -61,8 +61,8 @@ public class TreeParser {
     public TreeParser parse() {
         Set<BlockPos> processedBranchBlocks = new HashSet<>();
 
-        if (isTreeBranchBlock(blockAt(pos, world)))
-            processedBranchBlocks.add(pos);
+        if (isTreeBranchBlock(blockAt(blockPos, world)))
+            processedBranchBlocks.add(blockPos);
 
         while (processedBranchBlocks.size() > 0) {
             processedBranchBlocks = processedBranchBlocks.stream()

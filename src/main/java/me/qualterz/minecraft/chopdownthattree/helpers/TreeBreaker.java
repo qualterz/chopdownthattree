@@ -50,11 +50,11 @@ public class TreeBreaker {
         this.breakPos = pos;
         this.world = world;
         this.parser = TreeParser.setup()
-                .pos(pos).world(world).apply();
+                .blockPos(pos).world(world).apply();
     }
 
     public TreeBreaker(TreeParser parser) {
-        this.breakPos = parser.pos();
+        this.breakPos = parser.blockPos();
         this.world = parser.world();
         this.parser = parser;
     }
