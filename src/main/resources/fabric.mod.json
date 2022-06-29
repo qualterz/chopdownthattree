@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "ChopDownThatTree",
-  "description": "A mod that changes tree breaking process",
+  "description": "A mod that simplifies tree breaking process",
   "authors": [
     "Qualterz"
   ],
