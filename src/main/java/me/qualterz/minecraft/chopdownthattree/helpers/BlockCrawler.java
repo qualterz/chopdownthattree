@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
 
 public class BlockCrawler {
-    private final PriorityQueue<BlockPos> blocksToCrawl = new PriorityQueue<>();
+    @Getter private final PriorityQueue<BlockPos> blocksToCrawl = new PriorityQueue<>();
 
     @Getter private final World world;
     @Getter private final BlockPos initialPos;
@@ -24,6 +24,10 @@ public class BlockCrawler {
 
     private void initialize() {
         blocksToCrawl.add(initialPos);
+    }
+
+    public boolean hasBlocksToCrawl() {
+        return !blocksToCrawl.isEmpty();
     }
 
     public Optional<BlockPos> crawl(Predicate<BlockPos> predicate) {
