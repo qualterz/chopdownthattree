@@ -77,13 +77,17 @@ public class TreeParser {
             branchBlocks.addAll(processedBranchBlocks);
         }
 
+        processBranchAttachmentBlocks();
+
+        return this;
+    }
+
+    private void processBranchAttachmentBlocks() {
         branchBlocks.forEach(block -> {
             var attachments = getTreeBranchPartAttachments(block, world);
 
             if (!attachments.isEmpty())
                 branchAttachmentBlocks.putAll(block, attachments);
         });
-
-        return this;
     }
 }
