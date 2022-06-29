@@ -42,7 +42,7 @@ public class TreeUtil {
         return getNeighborBlocks(pos)
                 .stream()
                 .filter(block -> isTreeBranchAttachmentBlock(blockAt(block, world)))
-                .collect(Collectors.toUnmodifiableSet());
+                .collect(Collectors.toSet());
     }
 
     public static Set<BlockPos> getTreeBranchParts(BlockPos pos, World world, GrowDirection direction) {
@@ -65,7 +65,7 @@ public class TreeUtil {
             return isLogBlock(block) && block.equals(originalBlock)
                     || isBlockVariantOf(block, originalBlock)
                     || isStrippedBlock(block);
-        }).collect(Collectors.toUnmodifiableSet());
+        }).collect(Collectors.toSet());
     }
 
     public static boolean isTreeBranchAttachmentBlock(Block block) {
