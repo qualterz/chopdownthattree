@@ -8,6 +8,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
+
 /**
  * A class that allows to break tree structures
  */
@@ -43,28 +45,24 @@ public class TreeBreaker {
     @Setter @Getter
     private boolean drop = false;
 
-    @Getter
-    private TreeParser parser;
-
     public TreeBreaker(BlockPos breakPos, World world) {
         this.breakPos = breakPos;
         this.world = world;
-        this.parser = TreeParser.setup()
-                .blockPos(breakPos).world(world).apply();
     }
 
     public TreeBreaker(TreeParser parser) {
         this.breakPos = parser.blockPos();
         this.world = parser.world();
-        this.parser = parser;
     }
 
     /**
      * This method is used to break the tree
      */
     public void breakTree() {
-        var blocksToBreak = parser.parse().blocks().stream();
-        if (!whole) blocksToBreak = blocksToBreak.filter(blockPos -> blockPos.getY() >= breakPos.getY());
-        blocksToBreak.forEach(block -> world.breakBlock(block, drop, breakerEntity));
+        var direction = whole ? GrowDirection.BOTH : GrowDirection.UPWARDS;
+        var parser = TreeParser.setup().blockPos(breakPos).world(world).direction(direction).apply();
+        var blocks = parser.parse().blocks().stream();
+
+        blocks.forEach(block -> world.breakBlock(block, drop, breakerEntity));
     }
 }
