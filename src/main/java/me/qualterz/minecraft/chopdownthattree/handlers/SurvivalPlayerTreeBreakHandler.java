@@ -36,9 +36,8 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
                 .sorted((prev, next) -> {
                     var distancePrev = prev.getSquaredDistance(breakPos);
                     var distanceNext = next.getSquaredDistance(breakPos);
-                    return (int) Math.min(distancePrev, distanceNext);
+                    return (int) (distancePrev - distanceNext);
                 })
-                .sorted()
                 .findFirst();
 
         logToBreak.ifPresentOrElse(
