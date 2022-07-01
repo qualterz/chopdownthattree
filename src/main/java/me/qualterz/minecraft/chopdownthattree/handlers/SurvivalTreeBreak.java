@@ -8,12 +8,11 @@ import net.minecraft.world.World;
 
 import me.qualterz.minecraft.chopdownthattree.utils.BlockUtil;
 
-import static me.qualterz.minecraft.chopdownthattree.utils.BlockUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.EntityUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
 
-public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
-    public SurvivalPlayerTreeBreakHandler(BlockPos breakPos, World world, PlayerEntity player) {
+public class SurvivalTreeBreak extends PlayerTreeBreakHandler {
+    public SurvivalTreeBreak(BlockPos breakPos, World world, PlayerEntity player) {
         super(breakPos, world, player);
     }
 
@@ -49,7 +48,6 @@ public class SurvivalPlayerTreeBreakHandler extends PlayerTreeBreakHandler {
                 () -> {
                     getTreeBreaker(parser).breakTree();
                     state.choppedLogs.removeAll(branchBlocks);
-                    state.choppedLogs.removeIf(block -> !isLogBlock(blockAt(block, world)));
                 });
 
         state.markDirty();

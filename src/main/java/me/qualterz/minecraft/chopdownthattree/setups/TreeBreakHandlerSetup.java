@@ -4,10 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import net.minecraft.util.math.BlockPos;
 
-import me.qualterz.minecraft.chopdownthattree.handlers.CreativePlayerTreeBreakHandler;
-import me.qualterz.minecraft.chopdownthattree.handlers.DummyBreakHandler;
-import me.qualterz.minecraft.chopdownthattree.handlers.SurvivalPlayerTreeBreakHandler;
-import me.qualterz.minecraft.chopdownthattree.handlers.BreakHandler;
+import me.qualterz.minecraft.chopdownthattree.handlers.*;
 
 import static me.qualterz.minecraft.chopdownthattree.utils.EntityUtil.*;
 import static me.qualterz.minecraft.chopdownthattree.utils.TreeUtil.*;
@@ -25,22 +22,21 @@ public class TreeBreakHandlerSetup {
         return new TreeBreakHandlerSetup(pos, world);
     }
 
-    public BreakHandler forPlayer(PlayerEntity player) {
+    public PlayerTreeBreakHandler forPlayer(PlayerEntity player) {
         if (!isTreeBranch(pos, world))
-            return new DummyBreakHandler(pos, world);
+            return new DefaultTreeBreak(pos, world, player);
 
         if (player.isCreative()) {
             if (usesAxe(player))
-                return new CreativePlayerTreeBreakHandler(pos, world, player);
+                return new CreativeTreeBreak(pos, world, player);
             else
-                return new DummyBreakHandler(pos, world);
+                return new DefaultTreeBreak(pos, world, player);
         } else {
             // Do not process block break as tree break
-            if (isTreeBranchTop(pos, world) || player.isSneaking()) {
-                return new DummyBreakHandler(pos, world);
-            }
+            if (isTreeBranchTop(pos, world) || player.isSneaking())
+                return new DefaultTreeBreak(pos, world, player);
             else
-                return new SurvivalPlayerTreeBreakHandler(pos, world, player);
+                return new SurvivalTreeBreak(pos, world, player);
         }
     }
 }
