@@ -61,7 +61,7 @@ public class TreeBreaker {
     public void breakTree() {
         var direction = whole ? GrowDirection.BOTH : GrowDirection.UPWARDS;
         var parser = TreeParser.setup().blockPos(breakPos).world(world).direction(direction).apply();
-        var blocks = parser.parse().blocks().stream();
+        var blocks = parser.blocks().isEmpty() ? parser.parse().blocks() : parser.blocks();
 
         blocks.forEach(block -> world.breakBlock(block, drop, breakerEntity));
     }
