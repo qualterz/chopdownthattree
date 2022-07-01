@@ -52,7 +52,7 @@ public class SurvivalTreeBreak extends PlayerTreeBreakHandler {
 
         state.markDirty();
 
-        return !logToBreak.isPresent();
+        return logToBreak.isEmpty();
     }
 
     private void updateBlockWithParticle(BlockPos pos) {
