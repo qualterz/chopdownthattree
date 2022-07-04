@@ -1,7 +1,7 @@
 # Chop Down That Tree
 A Fabric mod that simplifies tree breaking process
 
-<details>
+<details open>
 <summary>Demonstration</summary>
 <br>
 
