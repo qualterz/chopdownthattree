@@ -1,5 +1,5 @@
 # Chop Down That Tree
-A Minecraft mod that simplifies tree breaking process
+A Fabric mod that simplifies tree breaking process
 
 <details open>
 <summary>Demonstration</summary>
