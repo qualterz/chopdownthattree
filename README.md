@@ -11,5 +11,7 @@ https://user-images.githubusercontent.com/38355785/177180754-4868d7c5-228b-4672-
 
 </details>
 
+Requires [Fabric API](https://github.com/FabricMC/fabric)
+
 ## Notes
 This mod can be used on servers, but it is not yet optimized and vulnerable to TPS attacks
