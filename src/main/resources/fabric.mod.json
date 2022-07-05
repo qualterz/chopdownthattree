@@ -3,7 +3,7 @@
   "id": "chopdownthattree",
   "version": "${version}",
 
-  "name": "Chop Down That Tree",
+  "name": "ChopDownThatTree",
   "description": "A mod that simplifies tree breaking process",
   "authors": [
     "qualterz"

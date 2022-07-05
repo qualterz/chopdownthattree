@@ -1,4 +1,4 @@
-# Chop Down That Tree
+# ChopDownThatTree
 A Fabric mod that simplifies tree breaking process
 
 <details open>
