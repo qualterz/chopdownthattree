@@ -1,12 +1,6 @@
 # ChopDownThatTree
 Break trees in a more casual way
 
-#### Survival
-- Break tree in a balanced manner, on sneaking break only block
-
-#### Creative
-- Break tree instantly, on sneaking break whole tree
-
 <details open>
 <summary>Demonstration</summary>
 <br>
@@ -16,6 +10,12 @@ https://user-images.githubusercontent.com/38355785/177180757-87a909e2-c706-45eb-
 https://user-images.githubusercontent.com/38355785/177180754-4868d7c5-228b-4672-bfb2-e89c342de156.mp4
 
 </details>
+
+#### Survival
+- Break tree in a balanced manner, on sneaking break only block
+
+#### Creative
+- Break tree instantly, on sneaking break whole tree
 
 Requires [Fabric API](https://github.com/FabricMC/fabric)
 
