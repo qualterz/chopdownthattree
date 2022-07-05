@@ -1,5 +1,11 @@
 # ChopDownThatTree
-A Fabric mod that simplifies tree breaking process
+Break trees in a more casual way
+
+#### Survival
+- Break tree in a balanced manner, on sneaking break only block
+
+#### Creative
+- Break tree instantly, on sneaking break whole tree
 
 <details open>
 <summary>Demonstration</summary>
