@@ -23,4 +23,4 @@ Requires [Fabric API](https://github.com/FabricMC/fabric)
 This mod can be used on servers, but it is not yet optimized and vulnerable to TPS attacks
 
 ### Mod compatibility
-This mod tries to be compatible with other mods as possible
+This mod tries to be as compatible with other mods as possible
