@@ -1,7 +1,7 @@
-Requires [Fabric API](https://github.com/FabricMC/fabric)
-
 # ChopDownThatTree
 Break trees in a more casual way
+
+Requires [Fabric API](https://github.com/FabricMC/fabric)
 
 <details open>
 <summary>Demonstration</summary>
